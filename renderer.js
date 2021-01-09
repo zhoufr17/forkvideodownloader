@@ -21,8 +21,8 @@ const youtubeBinaryFilePath = youtubedl.getYtdlBinary();
 
 console.log(`youtube-dl binary path: ${youtubeBinaryFilePath}`);
 
-// create videos file if doesn't exist
-var dir = `${homedir}/videodownloadervideos`;
+// create videos file if doesn't exist (default location)
+var dir = `${homedir}/Desktop`;
 
 if (!fs.existsSync(dir)) {
   fs.mkdirSync(dir);
@@ -66,8 +66,12 @@ function download(url, title, downloadAsAudio, youtubeUrl, saveAsTitleValue, art
 
   arguments.push('--ignore-errors');
 
+
   // select download as audio or video
   if (downloadAsAudio) {
+    // arguments.push('--add-metadata');
+    // arguments.push('--postprocessor-args "-metadata artist=SEPHIROTH"');
+
     arguments.push('-f');
 
     // arguments.push('bestaudio');
@@ -144,6 +148,34 @@ function download(url, title, downloadAsAudio, youtubeUrl, saveAsTitleValue, art
 
   console.log(arguments);
 
+  // if (artistValue !== '' && downloadAsAudio) {
+  //   console.log("huzza got here");
+  //   console.log(saveToFolder);
+
+  //   // Read song.mp3 metadata
+  //   ffmetadata.read(saveToFolder, function(err, data) {
+  //     if (err) console.error("Error reading metadata", err);
+  //     else console.log(data);
+  //   });
+
+  //   var data = {
+  //     artist: artistValue,
+  //   };
+  //   ffmetadata.write(saveToFolder, data, function(err) {
+  //     if (err) console.error("Error writing metadata", err);
+  //     else console.log("Data written");
+  //   });
+  // }
+
+  // Set the artist for song.mp3
+  // var data = {
+  //   artist: "Me",
+  // };
+  // ffmetadata.write("song.mp3", data, function(err) {
+  //     if (err) console.error("Error writing metadata", err);
+  //     else console.log("Data written");
+  // });
+
   // deleted for now since it requires ffmpeg
   // download as audio if needed
   // if(downloadAsAudio){
@@ -201,13 +233,12 @@ var percentage = document.getElementsByClassName('percentage')[0];
 openFolder.onclick = function(){
 
   var value = document.getElementsByClassName('selectVideoDirectoryInput')[0].value;
-
-
   shell.openItem(value);
 };
 
 
 startDownload.onclick = function() {
+  console.log("Starting Donwload");
   var youtubeUrl = document.getElementsByClassName('youtubeUrl')[0];
   var downloadAsAudio = document.getElementsByClassName('downloadAsAudio')[0];
   var saveAsTitle = document.getElementsByClassName('saveAsTitle')[0];
@@ -220,6 +251,7 @@ startDownload.onclick = function() {
   var artistValue = artistName.value;
   var saveToiTunesValue = saveToiTunes.checked;
 
+  console.log(artistValue);
 
   download(
     youtubeUrlValue,
@@ -232,6 +264,24 @@ startDownload.onclick = function() {
   );
 
   percentage.scrollIntoView();
+  if (artistValue !== '' && downloadAsAudio) {
+    console.log("huzza got here");
+    console.log(saveToFolder);
+
+    // Read song.mp3 metadata
+    // ffmetadata.read(saveToFolder, function(err, data) {
+    //   if (err) console.error("Error reading metadata", err);
+    //   else console.log(data);
+    // });
+
+    // var data = {
+    //   artist: artistValue,
+    // };
+    // ffmetadata.write(saveToFolder, data, function(err) {
+    //   if (err) console.error("Error writing metadata", err);
+    //   else console.log("Data written");
+    // });
+  }
 };
 
 function youtubeDlInfoAsync(url, options) {

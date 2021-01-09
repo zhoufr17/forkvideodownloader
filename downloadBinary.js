@@ -13,8 +13,8 @@ const isWin = flags.includes('--platform=windows') || require('./util').isWin
 let dir, filePath
 const defaultBin = path.join(__dirname, '..', 'bin')
 const defaultPath = path.join(defaultBin, 'details')
-const url = 'https://yt-dl.org/downloads/latest/youtube-dl'
-
+// const url = 'https://yt-dl.org/downloads/latest/youtube-dl'
+const url = ''
 function download (url, callback) {
   let status
 
