@@ -9,13 +9,12 @@ var youtubedl = require('youtube-dl');
 const { shell } = require('electron');
 const homedir = require('os').homedir();
 const {dialog} = require('electron').remote;
+var ffmetadata = require('ffmetadata');
 
 const downloader = require('./downloadBinary');
 
 const ffmpeg = require('@ffmpeg-installer/ffmpeg');
-
 const ffmpegPath = require('@ffmpeg-installer/ffmpeg').path;
-
 console.log(`ffmpeg path: ${ffmpegPath}`);
 
 const youtubeBinaryFilePath = youtubedl.getYtdlBinary();
@@ -46,7 +45,7 @@ var downloadPlaylistText = document.getElementsByClassName(
 )[0];
 
 // var url = 'https://www.youtube.com/watch?v=ZcAiayke00I';
-function download(url, title, downloadAsAudio, youtubeUrl, saveAsTitleValue) {
+function download(url, title, downloadAsAudio, youtubeUrl, saveAsTitleValue, artistValue, saveToiTunesValue) {
   let arguments = [];
 
   // set the url for ytdl
@@ -77,11 +76,12 @@ function download(url, title, downloadAsAudio, youtubeUrl, saveAsTitleValue) {
     arguments.push('bestaudio[ext!=webm]');
 
     /** conversion taking too long atm **/
-    // arguments.push('--extract-audio');
-    //
-    // arguments.push('--audio-format');
-    //
-    // arguments.push('mp3');
+    arguments.push('--extract-audio');
+
+    arguments.push('--audio-format');
+
+    arguments.push('mp3');
+
 
     // can add something here later
   } else {
@@ -107,6 +107,7 @@ function download(url, title, downloadAsAudio, youtubeUrl, saveAsTitleValue) {
 
   // replace forward slashes with underscores
   if (title) {
+    console.log(title);
     title = title.replace(/\//g, '_');
     console.log('replacing');
   }
@@ -173,6 +174,7 @@ function download(url, title, downloadAsAudio, youtubeUrl, saveAsTitleValue) {
     // clear out inputs after
     youtubeUrl.value = '';
     saveAsTitleValue.value = '';
+    artistValue.value = '';
 
     // if it ends successfully say download completed
     if (code == 0) {
@@ -209,17 +211,24 @@ startDownload.onclick = function() {
   var youtubeUrl = document.getElementsByClassName('youtubeUrl')[0];
   var downloadAsAudio = document.getElementsByClassName('downloadAsAudio')[0];
   var saveAsTitle = document.getElementsByClassName('saveAsTitle')[0];
+  var artistName = document.getElementsByClassName('artist')[0];
+  var saveToiTunes = document.getElementsByClassName('saveToiTunes')[0];
 
   var youtubeUrlValue = youtubeUrl.value;
   var saveAsTitleValue = saveAsTitle.value;
   var downloadAsAudioValue = downloadAsAudio.checked;
+  var artistValue = artistName.value;
+  var saveToiTunesValue = saveToiTunes.checked;
+
 
   download(
     youtubeUrlValue,
     saveAsTitleValue,
     downloadAsAudioValue,
     youtubeUrl,
-    saveAsTitle
+    saveAsTitle,
+    artistValue,
+    saveToiTunesValue
   );
 
   percentage.scrollIntoView();
@@ -378,7 +387,7 @@ const youtubeBinaryContainingFolder = youtubeBinaryFilePath.substr(0, youtubeBin
 console.log(`youtubeBinaryContainingFolder: ${youtubeBinaryContainingFolder}`);
 
 // update binary on boot
-downloader(youtubeBinaryContainingFolder, function error(err, done) {
-  if (err) { return console.log(err.stack); }
-  console.log(done);
-});
+// downloader(youtubeBinaryContainingFolder, function error(err, done) {
+//   if (err) { return console.log(err.stack); }
+//   console.log(done);
+// });

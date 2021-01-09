@@ -77,19 +77,19 @@ function downloader (binDir, callback) {
 
   createBase(binDir)
 
-  download(url, function error (err, newVersion) {
-    if (err) return callback(err)
-    fs.writeFileSync(
-      defaultPath,
-      JSON.stringify({
-        version: newVersion,
-        path: binDir ? filePath : binDir,
-        exec: exec('youtube-dl')
-      }),
-      'utf8'
-    )
-    return callback(null, 'Downloaded youtube-dl ' + newVersion)
-  })
+  // download(url, function error (err, newVersion) {
+  //   if (err) return callback(err)
+  //   fs.writeFileSync(
+  //     defaultPath,
+  //     JSON.stringify({
+  //       version: newVersion,
+  //       path: binDir ? filePath : binDir,
+  //       exec: exec('youtube-dl')
+  //     }),
+  //     'utf8'
+  //   )
+  //   return callback(null, 'Downloaded youtube-dl ' + newVersion)
+  // })
 }
 
 module.exports = downloader
