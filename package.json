@@ -4,14 +4,21 @@
   "description": "FORK SAUCE",
   "main": "main.js",
   "dependencies": {
-    "electron": "^5.0.13",
-    "ffmetadata": "^1.6.0"
+    "@ffmpeg-installer/ffmpeg": "^1.0.19",
+    "ffmetadata": "^1.6.0",
+    "ffmpeg": "0.0.4",
+    "fs-extra": "^8.1.0",
+    "youtube-dl": "^2.0.0",
+    "ytdl-core": "^0.29.2"
   },
-  "devDependencies": {},
+  "devDependencies": {
+    "electron": "^5.0.13",
+    "electron-packager": "^15.2.0",
+    "electron-builder": "^20.44.4"
+  },
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "start": "electron ."
-
   },
   "repository": {
     "type": "git",

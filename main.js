@@ -1,6 +1,8 @@
 // Modules to control application life and create native browser window
-const {app, BrowserWindow} = require('electron');
+const {app, BrowserWindow, Menu, MenuItem} = require('electron');
 const path = require('path');
+// const Menu = electron.Menu
+// const MenuItem = electron.MenuItem
 
 // Keep a global reference of the window object, if you don't, the window will
 // be closed automatically when the JavaScript object is garbage collected.
@@ -35,7 +37,33 @@ function createWindow () {
 // This method will be called when Electron has finished
 // initialization and is ready to create browser windows.
 // Some APIs can only be used after this event occurs.
-app.on('ready', createWindow);
+// app.on('ready', createWindow);
+app.on('ready', ()=>{
+//   BrowserWindow.addDevToolsExtension(
+//     path.join(os.homedir(), '/AppData/Local/Google/Chrome/User Data/Default/Extensions/fmkadmapgofadopljbjfkapdkoienihi/3.6.0_0')
+//  )
+  createWindow();
+  const ctxMenu = new Menu();
+  ctxMenu.append(new MenuItem({
+    label:'Cut',
+    role:'cut',
+    click:()=>{console.log('Paste clicked!')}
+  }))
+  ctxMenu.append(new MenuItem({
+    label:'Copy',
+    role:'copy',
+    click:()=>{console.log('Paste clicked!')}
+  }))
+  ctxMenu.append(new MenuItem({
+    label:'Paste',
+    role:'paste',
+    click:()=>{console.log('Paste clicked!')}
+  }))
+
+  mainWindow.webContents.on('context-menu',(e,params)=>{
+    ctxMenu.popup(mainWindow,params.x,params.y)
+  })
+})
 
 // Quit when all windows are closed.
 app.on('window-all-closed', function () {

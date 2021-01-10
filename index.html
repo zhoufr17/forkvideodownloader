@@ -37,12 +37,12 @@
       <br>
       <div class="titleDiv" style="height:20px">
         <label style="font-size:22px;margin-bottom: 0;" for="">Title</label>
-        <input type="text" class="saveAsTitle" id="saveAsTitle" value="" style="text-align:center;width:100%;margin-bottom:9px;font-size:17px;" placeholder="Let me go home">
+        <input type="text" class="saveAsTitle" id="saveAsTitle" value="" style="text-align:center;width:100%;margin-bottom:9px;font-size:17px;" placeholder="i.e: Let me go home">
       </div>
 
       <!-- </div class="artistDiv" style="height:20"> -->
         <label style="font-size:22px;margin-bottom: 0;margin-top: 100px; text-align: center;" for="">Artist/Author (optional)</label>
-        <input type="text" class="artist" id="artist" value="" style="text-align:center;width:100%;margin-bottom:9px;font-size:17px;" placeholder="Michael Buble">
+        <input type="text" class="artist" id="artist" value="" style="text-align:center;width:100%;margin-bottom:9px;font-size:17px;" placeholder="i.e.: Michael Bublé">
       <!-- <div> -->
 
 
@@ -64,12 +64,13 @@
       <button type="button" class="btn btn-primary btn-sm selectVideoDirectory" style="margin-top:7px;margin-bottom:32px;">Select Directory</button>
 
       <br>
-
-      <label for="" style="margin-right: 7px;margin-top:5px;">Download As Audio</label>
-      <input type="checkbox" class="downloadAsAudio">
+      <form name=f1>
+      <label for="" style="margin-right: 7px;margin-top:5px;">Download ONLY As Audio</label>
+      <input type="checkbox" class="downloadAsAudio" id="dlAsAudio" onclick="audioCheck(this.checked)">
       <br>
-      <label for="" style="margin-right: 7px;margin-top:5px;"><s>Save to iTunes</s>(Does not work currently)</label>
-      <input type="checkbox" class="saveToiTunes">
+      <label for="" style="margin-right: 7px;margin-top:5px;">Save to iTunes</label>
+      <input type="checkbox" class="saveToiTunes" id="saveToiTunes" disabled="">
+     </form>
       <br>
       <button class="startDownload btn btn-success" style="height: 43px;width: 180px;font-size: 20px;margin-top:20px;">Start Download</button>
       <br>
@@ -91,6 +92,11 @@
     <script src="./renderer.js"></script>
   </body>
     <script>
+      // function audioCheck(status) {
+      //   console.log("AUDIOCHECK");
+      //   status=!status;
+      //   saveToItunesCheck.disabled = status;
+      // }
 //      var selectVideoDirectoryInput = document.getElementsByClassName('selectVideoDirectoryInput')[0];
 //      selectVideoDirectoryInput.value = './videos';
     </script>

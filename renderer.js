@@ -4,7 +4,7 @@
 
 var fs = require('fs-extra');
 const spawn = require('child_process').spawn;
-const ytdl = require('ytdl-core');
+// const ytdl = require('ytdl-core');
 var youtubedl = require('youtube-dl');
 const { shell } = require('electron');
 const homedir = require('os').homedir();
@@ -23,9 +23,25 @@ console.log(`youtube-dl binary path: ${youtubeBinaryFilePath}`);
 
 // create videos file if doesn't exist (default location)
 var dir = `${homedir}/Desktop`;
+var iTunesDir = `${homedir}/Music/iTunes/iTunes Media/Automatically Add to iTunes/`;
 
 if (!fs.existsSync(dir)) {
   fs.mkdirSync(dir);
+}
+
+var saveToItunesCheck = document.getElementById(
+  'saveToiTunes'
+);
+if (!fs.existsSync(iTunesDir)) {
+  saveToItunesCheck.disabled = true;
+}
+
+function audioCheck(status) {
+  console.log("AUDIOCHECK");
+  status=!status;
+  console.log(status);
+  saveToItunesCheck.checked = false;
+  saveToItunesCheck.disabled = status;
 }
 
 
@@ -58,6 +74,12 @@ function download(url, title, downloadAsAudio, youtubeUrl, saveAsTitleValue, art
 
   arguments.push('--add-metadata');
 
+  // arguments.push('--postprocessor-args');
+
+  // arguments.push('-metadata');
+
+  // arguments.push('artist=Pink Floyd')
+
   arguments.push('--ffmpeg-location');
 
   arguments.push(ffmpegPath);
@@ -85,6 +107,8 @@ function download(url, title, downloadAsAudio, youtubeUrl, saveAsTitleValue, art
     arguments.push('--audio-format');
 
     arguments.push('mp3');
+
+    // arguments.push('--add-metadata --postprocessor-args "-metadata artist=Pink\ Floyd"');
 
 
     // can add something here later
@@ -184,8 +208,11 @@ function download(url, title, downloadAsAudio, youtubeUrl, saveAsTitleValue, art
   // }
 
   console.log(arguments);
-
+  console.log("starting coMMAND!!!!!!!!!!!!!!!!!!!")
   const ls = spawn(youtubeBinaryFilePath, arguments);
+  console.log(ls);
+  console.log("EXECUTED coMMAND!!!!!!!!!!!!!!!!!!!")
+
 
   ls.stdout.on('data', data => {
     percentage.innerText = data;
@@ -214,7 +241,58 @@ function download(url, title, downloadAsAudio, youtubeUrl, saveAsTitleValue, art
     }
 
     console.log(`child process exited with code ${code}`);
+
+    // ffmpeg -i default.mp4 -metadata title="my title" -codec copy output.mp4 && mv output.mp4 default.mp4
+    // ffmpeg -i input.mp3 -c copy -metadata artist="Someone" output.mp3
+    // let ffarguments = [];
+    // ffarguments.push('-i');
+    // ffarguments.push(`${filePath}/${fileName}.mp3`);
+    // ffarguments.push('-c');
+    // ffarguments.push('copy')
+    // ffarguments.push('-metadata');
+    // ffarguments.push('artist=Someone');
+    // ffarguments.push(`${homedir}/Downloads/ouptut.mp3`);
+    // const ffls = spawn(ffmpegPath, ffarguments);
+
+    // ffls.stdout.on('data', data => {
+    //   percentage.innerText = data;
+
+    //   console.log(`stdout!!!: ${data}`);
+    // });
+
+    // ffls.stderr.on('data', data => {
+    //   percentage.innerText = data;
+
+    //   console.log(`stderr!!!: ${data}`);
+    // });
+
+    if (saveToiTunesValue) {
+
+      // console.log("READING METADATA");
+      // ffmetadata.read(`${filePath}/${fileName}.mp3`, function(err, data) {
+      //   if (err) console.error("Error reading metadata", err);
+      //   else console.log(data);
+      // });
+      // console.log("DONE READING METADATA");
+
+      // var data = {
+      //   artist: artistValue,
+      //   title: title,
+      // };
+      // ffmetadata.write(`${filePath}/${fileName}.mp3`, data, function(err) {
+      //   if (err) console.error("Error writing metadata", err);
+      //   else console.log("Data written");
+      // });
+
+      // Async with callbacks:
+      fs.copy(`${filePath}/${fileName}.mp3`, `${homedir}/Downloads/${fileName}.mp3`, err => {
+        if (err) return console.error(err)
+        console.log('successfully added to iTunes!')
+      })
+    }
   });
+
+
 }
 
 // start download button
@@ -238,7 +316,7 @@ openFolder.onclick = function(){
 
 
 startDownload.onclick = function() {
-  console.log("Starting Donwload");
+  console.log("Starting Donwload!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
   var youtubeUrl = document.getElementsByClassName('youtubeUrl')[0];
   var downloadAsAudio = document.getElementsByClassName('downloadAsAudio')[0];
   var saveAsTitle = document.getElementsByClassName('saveAsTitle')[0];
@@ -250,8 +328,9 @@ startDownload.onclick = function() {
   var downloadAsAudioValue = downloadAsAudio.checked;
   var artistValue = artistName.value;
   var saveToiTunesValue = saveToiTunes.checked;
+  console.log(saveToiTunesValue);
 
-  console.log(artistValue);
+  // console.log(artistValue);
 
   download(
     youtubeUrlValue,
@@ -264,24 +343,31 @@ startDownload.onclick = function() {
   );
 
   percentage.scrollIntoView();
-  if (artistValue !== '' && downloadAsAudio) {
-    console.log("huzza got here");
-    console.log(saveToFolder);
 
-    // Read song.mp3 metadata
-    // ffmetadata.read(saveToFolder, function(err, data) {
-    //   if (err) console.error("Error reading metadata", err);
-    //   else console.log(data);
-    // });
+  // if (saveToiTunesValue) {
+  //   console.log("GOT HRERERERERERERERERE");
+  // }
+  // if (artistValue !== '' && downloadAsAudio) {
 
-    // var data = {
-    //   artist: artistValue,
-    // };
-    // ffmetadata.write(saveToFolder, data, function(err) {
-    //   if (err) console.error("Error writing metadata", err);
-    //   else console.log("Data written");
-    // });
-  }
+  //   // ${homedir}\Music\iTunes\iTunes Media\Automatically Add to iTunes\
+
+  //   console.log("huzza got here");
+  //   console.log(saveToFolder);
+
+  //   // Read song.mp3 metadata
+  //   // ffmetadata.read(saveToFolder, function(err, data) {
+  //   //   if (err) console.error("Error reading metadata", err);
+  //   //   else console.log(data);
+  //   // });
+
+  //   // var data = {
+  //   //   artist: artistValue,
+  //   // };
+  //   // ffmetadata.write(saveToFolder, data, function(err) {
+  //   //   if (err) console.error("Error writing metadata", err);
+  //   //   else console.log("Data written");
+  //   // });
+  // }
 };
 
 function youtubeDlInfoAsync(url, options) {
