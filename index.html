@@ -5,7 +5,7 @@
     <title>FZ EZ Video Downloader</title>
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"></script>
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css">
-
+    <link rel="stylesheet" href="style.css">
   </head>
   <body>
     <div class="sup" style="text-align:center">
@@ -23,7 +23,7 @@
 
       <h2 style="margin-bottom:16px;">Download A Video</h2>
 
-      <label style="font-size:22px;margin-bottom: 0;" for="">Video Url</label>
+      <label style="font-size:22px;margin-bottom: 0;" for="">Video URL</label>
       <br>
 
       <!-- input to paste in youtube url-->
@@ -57,7 +57,7 @@
        <!--SELECT DIRECTORY SECTION-->
 
       <br>
-      <label for="" style="font-size: 19px">Directory</label>
+      <label for="" style="font-size:22px">Directory</label>
 
       <input type="text" class="selectVideoDirectoryInput" value=""  style="text-align:center;width:100%;margin-bottom:9px;font-size:17px;">
 
@@ -70,11 +70,16 @@
       <br>
       <label for="" style="margin-right: 7px;margin-top:5px;">Save to iTunes</label>
       <input type="checkbox" class="saveToiTunes" id="saveToiTunes" disabled="">
-     </form>
+      </form>
       <br>
-      <button class="startDownload btn btn-success" style="height: 43px;width: 180px;font-size: 20px;margin-top:20px;">Start Download</button>
+      <button class="startDownload btn btn-success" style="height: 70px;width: 280px;font-size: 30px;margin-top:20px;" onclick="move()">Start Download</button>
       <br>
       <br>
+
+      <div id="myProgress">
+        <div id="myBar">0%</div>
+      </div>
+
       <h5 class="percentage" style="height:52px;overflow:hidden;margin-top: 23px;margin-bottom: 15px;font-size:22px;">Status: Download Hasn't Started Yet</h5>
 
 
@@ -83,15 +88,31 @@
       <br>
       <br>
       <br>
-
-
     </div>
-
-
 
     <script src="./renderer.js"></script>
   </body>
     <script>
+      var i = 0;
+      function move() {
+        console.log("Moving!!!!")
+        if (i == 0) {
+          i = 1;
+          var elem = document.getElementById("myBar");
+          var width = 10;
+          var id = setInterval(frame, 10);
+          function frame() {
+            if (width >= 100) {
+              clearInterval(id);
+              i = 0;
+            } else {
+              width++;
+              elem.style.width = width + "%";
+              elem.innerHTML = width  + "%";
+            }
+          }
+        }
+      }
       // function audioCheck(status) {
       //   console.log("AUDIOCHECK");
       //   status=!status;

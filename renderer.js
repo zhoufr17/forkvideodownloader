@@ -9,7 +9,6 @@ var youtubedl = require('youtube-dl');
 const { shell } = require('electron');
 const homedir = require('os').homedir();
 const {dialog} = require('electron').remote;
-var ffmetadata = require('ffmetadata');
 
 const downloader = require('./downloadBinary');
 
@@ -18,15 +17,23 @@ const ffmpegPath = require('@ffmpeg-installer/ffmpeg').path;
 console.log(`ffmpeg path: ${ffmpegPath}`);
 
 const youtubeBinaryFilePath = youtubedl.getYtdlBinary();
-
 console.log(`youtube-dl binary path: ${youtubeBinaryFilePath}`);
 
+// Progress Bar stuff
+var value = 0,
+// tb = document.getElementById("myBar"),
+progress = document.getElementById("myBar");
+barDiv = document.getElementById("myProgress");
+barDiv.style.display = "none"; //start off hide the progress bar
+
+
 // create videos file if doesn't exist (default location)
-var dir = `${homedir}/Desktop`;
+var dir = `${homedir}/Desktop`; //default
+var tempDirectory = `${homedir}/videoDLtemp`; //where files are first downloaded
 var iTunesDir = `${homedir}/Music/iTunes/iTunes Media/Automatically Add to iTunes/`;
 
-if (!fs.existsSync(dir)) {
-  fs.mkdirSync(dir);
+if (!fs.existsSync(tempDirectory)) {
+  fs.mkdirSync(tempDirectory);
 }
 
 var saveToItunesCheck = document.getElementById(
@@ -76,9 +83,11 @@ function download(url, title, downloadAsAudio, youtubeUrl, saveAsTitleValue, art
 
   // arguments.push('--postprocessor-args');
 
-  // arguments.push('-metadata');
+  // arguments.push("-metadata 'title=George Washington'");
 
-  // arguments.push('artist=Pink Floyd')
+  // arguments.push('--postprocessor-args');
+  // arguments.push("-metadata 'artist=Pink Floyed'");
+  // arguments.push("artist=Pink Floyd")
 
   arguments.push('--ffmpeg-location');
 
@@ -88,11 +97,10 @@ function download(url, title, downloadAsAudio, youtubeUrl, saveAsTitleValue, art
 
   arguments.push('--ignore-errors');
 
-
+  // increase(15);
+  updateProgressBar(18);
   // select download as audio or video
   if (downloadAsAudio) {
-    // arguments.push('--add-metadata');
-    // arguments.push('--postprocessor-args "-metadata artist=SEPHIROTH"');
 
     arguments.push('-f');
 
@@ -127,7 +135,8 @@ function download(url, title, downloadAsAudio, youtubeUrl, saveAsTitleValue, art
     // arguments.push('best');
   }
 
-
+  // increase(10);
+  updateProgressBar(28);
 
   // // verbose output
 
@@ -144,7 +153,9 @@ function download(url, title, downloadAsAudio, youtubeUrl, saveAsTitleValue, art
   // TODO: trim to max 255 letters
 
   // title is that passed or the one from youtube
+  // const fileName = title || '%(title)s';
   const fileName = title || '%(title)s';
+
 
   console.log(title);
 
@@ -153,17 +164,18 @@ function download(url, title, downloadAsAudio, youtubeUrl, saveAsTitleValue, art
   console.log(inputtedUrl);
 
   // create
-  if (!fs.existsSync(inputtedUrl)) {
-    fs.mkdirp(inputtedUrl);
-  }
+  // if (!fs.existsSync(inputtedUrl)) {
+  //   fs.mkdirp(inputtedUrl);
+  // }
 
-  console.log(__dirname);
+  // console.log(__dirname);
 
   const filePath = inputtedUrl;
+  const tempFilePath = tempDirectory;
 
   const fileExtension = `%(ext)s`;
 
-  let saveToFolder = `${filePath}/${fileName}.${fileExtension}`;
+  let saveToFolder = `${tempFilePath}/${fileName}.${fileExtension}`;
 
   console.log(saveToFolder);
 
@@ -172,47 +184,12 @@ function download(url, title, downloadAsAudio, youtubeUrl, saveAsTitleValue, art
 
   console.log(arguments);
 
-  // if (artistValue !== '' && downloadAsAudio) {
-  //   console.log("huzza got here");
-  //   console.log(saveToFolder);
-
-  //   // Read song.mp3 metadata
-  //   ffmetadata.read(saveToFolder, function(err, data) {
-  //     if (err) console.error("Error reading metadata", err);
-  //     else console.log(data);
-  //   });
-
-  //   var data = {
-  //     artist: artistValue,
-  //   };
-  //   ffmetadata.write(saveToFolder, data, function(err) {
-  //     if (err) console.error("Error writing metadata", err);
-  //     else console.log("Data written");
-  //   });
-  // }
-
-  // Set the artist for song.mp3
-  // var data = {
-  //   artist: "Me",
-  // };
-  // ffmetadata.write("song.mp3", data, function(err) {
-  //     if (err) console.error("Error writing metadata", err);
-  //     else console.log("Data written");
-  // });
-
-  // deleted for now since it requires ffmpeg
-  // download as audio if needed
-  // if(downloadAsAudio){
-  //   console.log('Download as audio');
-  //   arguments.push('-x');
-  // }
-
   console.log(arguments);
-  console.log("starting coMMAND!!!!!!!!!!!!!!!!!!!")
   const ls = spawn(youtubeBinaryFilePath, arguments);
   console.log(ls);
-  console.log("EXECUTED coMMAND!!!!!!!!!!!!!!!!!!!")
 
+  // increase(20);
+  updateProgressBar(48);
 
   ls.stdout.on('data', data => {
     percentage.innerText = data;
@@ -228,71 +205,115 @@ function download(url, title, downloadAsAudio, youtubeUrl, saveAsTitleValue, art
 
   ls.on('close', code => {
     playlistDownloadingDiv.style.display = 'none';
-    titleDiv.style.display = '';
+    // increase(20);
+    updateProgressBar(68);
 
-    // clear out inputs after
-    youtubeUrl.value = '';
-    saveAsTitleValue.value = '';
-    artistValue.value = '';
+
+    // ffmpeg -i default.mp4 -metadata title="my title" -codec copy output.mp4 && mv output.mp4 default.mp4
+    // ffmpeg -i input.mp3 -c copy -metadata artist="Someone" output.mp3
+    let ffarguments = [];
+    ffarguments.push('-y')
+    ffarguments.push('-i');
+    if (downloadAsAudio) {
+      ffarguments.push(`${tempFilePath}/${fileName}.mp3`); //input for audio
+    } else {
+      ffarguments.push(`${tempFilePath}/${fileName}.mp4`); //input for video
+    }
+    ffarguments.push('-c');
+    ffarguments.push('copy')
+
+    if (artistValue != '') {
+      ffarguments.push('-metadata');
+      var customArtist = 'artist=' + artistValue;
+      ffarguments.push(customArtist);
+    }
+    ffarguments.push('-metadata');
+    var customTitle = 'title=' + title;
+    ffarguments.push(customTitle);
+
+    let finalSaveLocation = `${filePath}/${fileName}.${fileExtension}`;
+
+    if (downloadAsAudio) {
+      finalSaveLocation = `${filePath}/${fileName}.mp3`;
+    } else {
+      finalSaveLocation = `${filePath}/${fileName}.mp4`;
+    }
+    // `${homedir}/Music/iTunes/iTunes Media/Automatically Add to iTunes/`
+    if (saveToiTunesValue) {
+      finalSaveLocation = `${homedir}/Music/iTunes/iTunes Media/Automatically Add to iTunes/${fileName}.mp3`;
+    }
+    ffarguments.push(finalSaveLocation) //output location
+    const ffls = spawn(ffmpegPath, ffarguments);
+
+    // increase(10);
+    updateProgressBar(78);
+    ffls.stdout.on('data', data => {
+      percentage.innerText = data;
+
+      console.log(`stdout!!!: ${data}`);
+    });
+
+    ffls.stderr.on('data', data => {
+      percentage.innerText = data;
+
+      console.log(`stderr!!!: ${data}`);
+    });
+
+    ffls.on('close', fcode => {
+      console.log("Cleanup files RN!!!")
+
+      if (fcode == 0) {
+        percentage.innerText = 'Download completed';
+        // increase(20);
+        updateProgressBar(98);
+        if (downloadAsAudio) {
+          fs.unlink(`${tempFilePath}/${fileName}.mp3`, (err => {
+            if (err) console.log(err);
+            else {
+              console.log("\nDeleted temp file: mp3");
+            }
+          }));
+        } else {
+          fs.unlink(`${tempFilePath}/${fileName}.mp4`, (err => {
+            if (err) console.log(err);
+            else {
+              console.log("\nDeleted temp file: mp4");
+            }
+          }));
+        }
+      }
+
+      console.log(`child process exited with code ffmpeg ${code}`);
+    });
 
     // if it ends successfully say download completed
     if (code == 0) {
       percentage.innerText = 'Download completed';
     }
 
+    titleDiv.style.display = '';
+
+    // clear out inputs after
+    youtubeUrl.value = '';
+    console.log("Youtube url value: " + youtubeUrl.value);
+    saveAsTitleValue.value = '';
+    console.log("saveAsTitleValue value: " + saveAsTitleValue.value);
+    // artistValue.value = '';
+
+    //fix this spaghetti code later!!!
+    var artistSauce = document.getElementById(
+      'artist'
+    );
+    artistSauce.value = '';
+    console.log("artistValue value: " + artistValue);
+
     console.log(`child process exited with code ${code}`);
 
-    // ffmpeg -i default.mp4 -metadata title="my title" -codec copy output.mp4 && mv output.mp4 default.mp4
-    // ffmpeg -i input.mp3 -c copy -metadata artist="Someone" output.mp3
-    // let ffarguments = [];
-    // ffarguments.push('-i');
-    // ffarguments.push(`${filePath}/${fileName}.mp3`);
-    // ffarguments.push('-c');
-    // ffarguments.push('copy')
-    // ffarguments.push('-metadata');
-    // ffarguments.push('artist=Someone');
-    // ffarguments.push(`${homedir}/Downloads/ouptut.mp3`);
-    // const ffls = spawn(ffmpegPath, ffarguments);
+    // Progress bar cleanup
+    // barDiv.style.display = "none";
+    // decrease(1000);
 
-    // ffls.stdout.on('data', data => {
-    //   percentage.innerText = data;
-
-    //   console.log(`stdout!!!: ${data}`);
-    // });
-
-    // ffls.stderr.on('data', data => {
-    //   percentage.innerText = data;
-
-    //   console.log(`stderr!!!: ${data}`);
-    // });
-
-    if (saveToiTunesValue) {
-
-      // console.log("READING METADATA");
-      // ffmetadata.read(`${filePath}/${fileName}.mp3`, function(err, data) {
-      //   if (err) console.error("Error reading metadata", err);
-      //   else console.log(data);
-      // });
-      // console.log("DONE READING METADATA");
-
-      // var data = {
-      //   artist: artistValue,
-      //   title: title,
-      // };
-      // ffmetadata.write(`${filePath}/${fileName}.mp3`, data, function(err) {
-      //   if (err) console.error("Error writing metadata", err);
-      //   else console.log("Data written");
-      // });
-
-      // Async with callbacks:
-      fs.copy(`${filePath}/${fileName}.mp3`, `${homedir}/Downloads/${fileName}.mp3`, err => {
-        if (err) return console.error(err)
-        console.log('successfully added to iTunes!')
-      })
-    }
   });
-
-
 }
 
 // start download button
@@ -332,42 +353,38 @@ startDownload.onclick = function() {
 
   // console.log(artistValue);
 
-  download(
-    youtubeUrlValue,
-    saveAsTitleValue,
-    downloadAsAudioValue,
-    youtubeUrl,
-    saveAsTitle,
-    artistValue,
-    saveToiTunesValue
-  );
+  if (youtubeUrlValue === '') {
+    const options = {
+      type: 'error',
+      buttons: ['Ok'],
+      defaultId: 2,
+      title: 'Error',
+      message: 'Please paste video URL before start download. 谢谢！',
+      detail: '-周先生',
+      checkboxChecked: true,
+    };
 
-  percentage.scrollIntoView();
+    dialog.showMessageBox(null, options, (response, checkboxChecked) => {
+      console.log(response);
+      console.log(checkboxChecked);
+    });
+  } else {
+    barDiv.style.display = "block";
+    // increase(5);
+    // decrease(1000);
+    updateProgressBar(8);
+    download(
+      youtubeUrlValue,
+      saveAsTitleValue,
+      downloadAsAudioValue,
+      youtubeUrl,
+      saveAsTitle,
+      artistValue,
+      saveToiTunesValue
+    );
 
-  // if (saveToiTunesValue) {
-  //   console.log("GOT HRERERERERERERERERE");
-  // }
-  // if (artistValue !== '' && downloadAsAudio) {
-
-  //   // ${homedir}\Music\iTunes\iTunes Media\Automatically Add to iTunes\
-
-  //   console.log("huzza got here");
-  //   console.log(saveToFolder);
-
-  //   // Read song.mp3 metadata
-  //   // ffmetadata.read(saveToFolder, function(err, data) {
-  //   //   if (err) console.error("Error reading metadata", err);
-  //   //   else console.log(data);
-  //   // });
-
-  //   // var data = {
-  //   //   artist: artistValue,
-  //   // };
-  //   // ffmetadata.write(saveToFolder, data, function(err) {
-  //   //   if (err) console.error("Error writing metadata", err);
-  //   //   else console.log("Data written");
-  //   // });
-  // }
+    percentage.scrollIntoView();
+  }
 };
 
 function youtubeDlInfoAsync(url, options) {
@@ -490,7 +507,7 @@ const selectVideoDirectoryButton = document.getElementsByClassName(
 const selectVideoDirectory = (selectVideoDirectoryButton.onclick = function() {
   // get path from electron and load it as selectedPath
   var selectedPath = dialog.showOpenDialog({
-    defaultPath: './videos',
+    defaultPath: './',
     properties: ['openDirectory']
   });
 
@@ -522,6 +539,36 @@ const youtubeBinaryContainingFolder = youtubeBinaryFilePath.substr(0, youtubeBin
 
 console.log(`youtubeBinaryContainingFolder: ${youtubeBinaryContainingFolder}`);
 
+// function increase(number){
+//   value += number;// same as value += 1, but better
+//   if(value>=100) value = 100;//keep it under 100%
+//   // tb.value = value;// set the value of the text field
+//   progress.innerHTML = value + "%";
+//   progress.style.width = value + "%";// set the width of the progress bar
+// }
+function updateProgressBar(max) {
+  var percentage = max;
+  // var curr = progressBar.value;
+  // var curr = value;
+  if(value>=100) value = 100;//keep it under 100%
+  var update = setInterval(function() {
+    if (value > percentage) {
+      clearInterval(update);
+    }
+    value++;
+    progress.innerHTML = value + "%";
+    progress.style.width = value + "%";
+    // value = curr;
+  }, 15)
+}
+
+function decrease(number){
+  value -= number;
+  if(value<=0) value = 0;//keep it over 0%
+  // tb.value = value;
+  progress.innerHTML = value + "%";
+  progress.style.width = value + "%";
+}
 // update binary on boot
 // downloader(youtubeBinaryContainingFolder, function error(err, done) {
 //   if (err) { return console.log(err.stack); }
