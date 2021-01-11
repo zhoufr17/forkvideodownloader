@@ -31,6 +31,11 @@ barDiv.style.display = "none"; //start off hide the progress bar
 var dir = `${homedir}/Desktop`; //default
 var tempDirectory = `${homedir}/videoDLtemp`; //where files are first downloaded
 var iTunesDir = `${homedir}/Music/iTunes/iTunes Media/Automatically Add to iTunes/`;
+var mPath = `${homedir}/Desktop/Music/Songs`;
+
+if(fs.existsSync(mPath)) {
+  dir = mPath;
+}
 
 if (!fs.existsSync(tempDirectory)) {
   fs.mkdirSync(tempDirectory);
@@ -149,15 +154,32 @@ function download(url, title, downloadAsAudio, youtubeUrl, saveAsTitleValue, art
     console.log('replacing');
   }
 
+  function somefunction(selector) {
+    return selector.replace(/(!|"|#|\$|%|\'|\(|\)|\*|\+|\,|\.|\/|\:|\;|\?|@)/g, function($1, $2) {
+        return "\\\\" + $2;
+    });
+  }
+
+  function somefunction2(selector) {
+    console.log("replacing COLON");
+    return selector.replace(/:/g, '\uA789');
+  }
+  // replace colons
+
+  console.log("fixing title up: " + title);
+  if (title) {
+    title = somefunction2(title);
+  }
+  console.log("done fixing title: " + title);
 
   // TODO: trim to max 255 letters
 
   // title is that passed or the one from youtube
   // const fileName = title || '%(title)s';
-  const fileName = title || '%(title)s';
+  const fileName = title;
 
 
-  console.log(title);
+  // console.log(title);
 
   let inputtedUrl = selectVideoDirectoryInput.value;
 
@@ -243,6 +265,8 @@ function download(url, title, downloadAsAudio, youtubeUrl, saveAsTitleValue, art
       finalSaveLocation = `${homedir}/Music/iTunes/iTunes Media/Automatically Add to iTunes/${fileName}.mp3`;
     }
     ffarguments.push(finalSaveLocation) //output location
+    console.log("FINAL LOCATION!!!!!!!!!!")
+    console.log(finalSaveLocation);
     const ffls = spawn(ffmpegPath, ffarguments);
 
     // increase(10);
@@ -261,11 +285,11 @@ function download(url, title, downloadAsAudio, youtubeUrl, saveAsTitleValue, art
 
     ffls.on('close', fcode => {
       console.log("Cleanup files RN!!!")
+      updateProgressBar(98);
 
       if (fcode == 0) {
-        percentage.innerText = 'Download completed';
+        percentage.innerText = 'Download Completed!';
         // increase(20);
-        updateProgressBar(98);
         if (downloadAsAudio) {
           fs.unlink(`${tempFilePath}/${fileName}.mp3`, (err => {
             if (err) console.log(err);
@@ -281,6 +305,8 @@ function download(url, title, downloadAsAudio, youtubeUrl, saveAsTitleValue, art
             }
           }));
         }
+      } else {
+        percentage.innerText = 'ERROR: Please double check Video URL and try download again.';
       }
 
       console.log(`child process exited with code ffmpeg ${code}`);
@@ -289,6 +315,8 @@ function download(url, title, downloadAsAudio, youtubeUrl, saveAsTitleValue, art
     // if it ends successfully say download completed
     if (code == 0) {
       percentage.innerText = 'Download completed';
+    } else {
+      percentage.innerText = 'Error: Please double check video URL and try download again.';
     }
 
     titleDiv.style.display = '';
@@ -345,13 +373,16 @@ startDownload.onclick = function() {
   var saveToiTunes = document.getElementsByClassName('saveToiTunes')[0];
 
   var youtubeUrlValue = youtubeUrl.value;
-  var saveAsTitleValue = saveAsTitle.value;
+  var vulnsaveAsTitleValue = saveAsTitle.value;
   var downloadAsAudioValue = downloadAsAudio.checked;
-  var artistValue = artistName.value;
+  var vulnArtistValue = artistName.value;
   var saveToiTunesValue = saveToiTunes.checked;
   console.log(saveToiTunesValue);
 
+  var saveAsTitleValue = vulnsaveAsTitleValue.trim();
+  var artistValue = vulnArtistValue.trim();
   // console.log(artistValue);
+
 
   if (youtubeUrlValue === '') {
     const options = {
@@ -368,10 +399,25 @@ startDownload.onclick = function() {
       console.log(response);
       console.log(checkboxChecked);
     });
+  } else if (saveAsTitleValue === '') {
+    const options = {
+      type: 'error',
+      buttons: ['Ok'],
+      defaultId: 2,
+      title: 'Error',
+      message: 'Please name your song before start download. 谢谢！',
+      detail: '-周先生',
+      checkboxChecked: true,
+    };
+
+    dialog.showMessageBox(null, options, (response, checkboxChecked) => {
+      console.log(response);
+      console.log(checkboxChecked);
+    });
   } else {
     barDiv.style.display = "block";
     // increase(5);
-    // decrease(1000);
+    decrease(1000);
     updateProgressBar(8);
     download(
       youtubeUrlValue,

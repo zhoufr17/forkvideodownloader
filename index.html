@@ -23,7 +23,7 @@
 
       <h2 style="margin-bottom:16px;">Download A Video</h2>
 
-      <label style="font-size:22px;margin-bottom: 0;" for="">Video URL</label>
+      <label style="font-size:22px;margin-bottom: 0;" for="">第一步：Video URL</label>
       <br>
 
       <!-- input to paste in youtube url-->
@@ -33,15 +33,16 @@
 
       <!--paste button-->
       <button type="button" onclick="myFunction()" class="btn btn-primary btn-sm" style="margin-top:7px;margin-bottom:32px;">Paste</button>
+      <!-- <button type="button" class="btn btn-primary btn-sm" style="margin-top:7px;margin-bottom:32px;">Paste</button> -->
 
       <br>
       <div class="titleDiv" style="height:20px">
-        <label style="font-size:22px;margin-bottom: 0;" for="">Title</label>
+        <label style="font-size:22px;margin-bottom: 0;" for="">第二步： Song/Video name (歌曲）</label>
         <input type="text" class="saveAsTitle" id="saveAsTitle" value="" style="text-align:center;width:100%;margin-bottom:9px;font-size:17px;" placeholder="i.e: Let me go home">
       </div>
 
       <!-- </div class="artistDiv" style="height:20"> -->
-        <label style="font-size:22px;margin-bottom: 0;margin-top: 100px; text-align: center;" for="">Artist/Author (optional)</label>
+        <label style="font-size:22px;margin-bottom: 0;margin-top: 100px; text-align: center;" for="">第三步：<b>(optional)</b>  Artist/Author (歌手)</label>
         <input type="text" class="artist" id="artist" value="" style="text-align:center;width:100%;margin-bottom:9px;font-size:17px;" placeholder="i.e.: Michael Bublé">
       <!-- <div> -->
 
@@ -65,10 +66,10 @@
 
       <br>
       <form name=f1>
-      <label for="" style="margin-right: 7px;margin-top:5px;">Download ONLY As Audio</label>
+      <label for="" style="margin-right: 7px;margin-top:5px;"><b>Download ONLY As Audio</b></Download></label>
       <input type="checkbox" class="downloadAsAudio" id="dlAsAudio" onclick="audioCheck(this.checked)">
       <br>
-      <label for="" style="margin-right: 7px;margin-top:5px;">Save to iTunes</label>
+      <label for="" style="margin-right: 7px;margin-top:5px;"><b>Save to iTunes (Must first check "Download as Audio")</b></label>
       <input type="checkbox" class="saveToiTunes" id="saveToiTunes" disabled="">
       </form>
       <br>
@@ -91,33 +92,9 @@
     </div>
 
     <script src="./renderer.js"></script>
+    <script src="./util.js"></script>
   </body>
     <script>
-      var i = 0;
-      function move() {
-        console.log("Moving!!!!")
-        if (i == 0) {
-          i = 1;
-          var elem = document.getElementById("myBar");
-          var width = 10;
-          var id = setInterval(frame, 10);
-          function frame() {
-            if (width >= 100) {
-              clearInterval(id);
-              i = 0;
-            } else {
-              width++;
-              elem.style.width = width + "%";
-              elem.innerHTML = width  + "%";
-            }
-          }
-        }
-      }
-      // function audioCheck(status) {
-      //   console.log("AUDIOCHECK");
-      //   status=!status;
-      //   saveToItunesCheck.disabled = status;
-      // }
 //      var selectVideoDirectoryInput = document.getElementsByClassName('selectVideoDirectoryInput')[0];
 //      selectVideoDirectoryInput.value = './videos';
     </script>
