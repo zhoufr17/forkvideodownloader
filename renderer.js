@@ -8,7 +8,10 @@ const spawn = require('child_process').spawn;
 var youtubedl = require('youtube-dl');
 const { shell } = require('electron');
 const homedir = require('os').homedir();
-const {dialog} = require('electron').remote;
+const {dialog, BrowserWindow} = require('electron').remote;
+const {remote} = require('electron');
+
+// var mainWindow = BrowserWindow.getFocusedWindow();
 
 const downloader = require('./downloadBinary');
 
@@ -35,6 +38,13 @@ var mPath = `${homedir}/Desktop/Music/Songs`;
 
 if(fs.existsSync(mPath)) {
   dir = mPath;
+  var autoITunes = document.getElementsByClassName('saveToiTunes')[0];
+  var autoDLasAudio = document.getElementsByClassName('downloadAsAudio')[0];
+
+  autoITunes.checked = true;
+  autoDLasAudio.checked = true;
+  // autoDLasAudio.disabled = true;
+
 }
 
 if (!fs.existsSync(tempDirectory)) {
@@ -288,7 +298,8 @@ function download(url, title, downloadAsAudio, youtubeUrl, saveAsTitleValue, art
       updateProgressBar(98);
 
       if (fcode == 0) {
-        percentage.innerText = 'Download Completed!';
+
+        percentage.innerText = 'Download Completed! (下载完成了！）';
         // increase(20);
         if (downloadAsAudio) {
           fs.unlink(`${tempFilePath}/${fileName}.mp3`, (err => {
@@ -305,13 +316,44 @@ function download(url, title, downloadAsAudio, youtubeUrl, saveAsTitleValue, art
             }
           }));
         }
+          // clear out inputs after
+        titleDiv.style.display = '';
+        youtubeUrl.value = '';
+        console.log("Youtube url value: " + youtubeUrl.value);
+        saveAsTitleValue.value = '';
+        console.log("saveAsTitleValue value: " + saveAsTitleValue.value);
+        // artistValue.value = '';
+
+        //fix this spaghetti code later!!!
+        var artistSauce = document.getElementById(
+          'artist'
+        );
+        artistSauce.value = '';
+        console.log("artistValue value: " + artistValue);
+
       } else {
-        percentage.innerText = 'ERROR: Please double check Video URL and try download again.';
+
+        percentage.innerText = 'ERROR: 您打进的网址有问题! 请您把打进的网址重新看一遍. 谢谢！';
+
+        const options = {
+          type: 'error',
+          buttons: ['Ok'],
+          defaultId: 2,
+          title: 'Error',
+          message: '您打进的网址有问题. 请您把打进的网址重新看一遍， 然后重新再下载。谢谢！',
+          detail: '-周先生',
+          checkboxChecked: true,
+        };
+
+        dialog.showMessageBox(remote.getCurrentWindow(), options, (response, checkboxChecked) => {
+          console.log(response);
+          console.log(checkboxChecked);
+        });
+
       }
 
       console.log(`child process exited with code ffmpeg ${code}`);
     });
-
     // if it ends successfully say download completed
     if (code == 0) {
       percentage.innerText = 'Download completed';
@@ -319,21 +361,7 @@ function download(url, title, downloadAsAudio, youtubeUrl, saveAsTitleValue, art
       percentage.innerText = 'Error: Please double check video URL and try download again.';
     }
 
-    titleDiv.style.display = '';
 
-    // clear out inputs after
-    youtubeUrl.value = '';
-    console.log("Youtube url value: " + youtubeUrl.value);
-    saveAsTitleValue.value = '';
-    console.log("saveAsTitleValue value: " + saveAsTitleValue.value);
-    // artistValue.value = '';
-
-    //fix this spaghetti code later!!!
-    var artistSauce = document.getElementById(
-      'artist'
-    );
-    artistSauce.value = '';
-    console.log("artistValue value: " + artistValue);
 
     console.log(`child process exited with code ${code}`);
 
@@ -367,10 +395,11 @@ openFolder.onclick = function(){
 startDownload.onclick = function() {
   console.log("Starting Donwload!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
   var youtubeUrl = document.getElementsByClassName('youtubeUrl')[0];
-  var downloadAsAudio = document.getElementsByClassName('downloadAsAudio')[0];
   var saveAsTitle = document.getElementsByClassName('saveAsTitle')[0];
   var artistName = document.getElementsByClassName('artist')[0];
   var saveToiTunes = document.getElementsByClassName('saveToiTunes')[0];
+  var downloadAsAudio = document.getElementsByClassName('downloadAsAudio')[0];
+
 
   var youtubeUrlValue = youtubeUrl.value;
   var vulnsaveAsTitleValue = saveAsTitle.value;
@@ -390,12 +419,12 @@ startDownload.onclick = function() {
       buttons: ['Ok'],
       defaultId: 2,
       title: 'Error',
-      message: 'Please paste video URL before start download. 谢谢！',
+      message: '请把网址粘贴再下载. 谢谢！',
       detail: '-周先生',
       checkboxChecked: true,
     };
 
-    dialog.showMessageBox(null, options, (response, checkboxChecked) => {
+    dialog.showMessageBox(remote.getCurrentWindow(), options, (response, checkboxChecked) => {
       console.log(response);
       console.log(checkboxChecked);
     });
@@ -405,12 +434,12 @@ startDownload.onclick = function() {
       buttons: ['Ok'],
       defaultId: 2,
       title: 'Error',
-      message: 'Please name your song before start download. 谢谢！',
+      message: '请把歌曲粘贴再下载. 谢谢！',
       detail: '-周先生',
       checkboxChecked: true,
     };
 
-    dialog.showMessageBox(null, options, (response, checkboxChecked) => {
+    dialog.showMessageBox(remote.getCurrentWindow(), options, (response, checkboxChecked) => {
       console.log(response);
       console.log(checkboxChecked);
     });
@@ -514,9 +543,9 @@ async function populateTitle() {
   console.log(info);
 }
 
-document.getElementsByClassName('youtubeUrl')[0].onblur = async function() {
-  await populateTitle();
-};
+// document.getElementsByClassName('youtubeUrl')[0].onblur = async function() {
+//   await populateTitle();
+// };
 
 
 
