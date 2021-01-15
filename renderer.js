@@ -162,6 +162,7 @@ function download(url, title, downloadAsAudio, youtubeUrl, saveAsTitleValue, art
     console.log(title);
     title = title.replace(/\//g, '_');
     console.log('replacing');
+
   }
 
   function somefunction(selector) {
@@ -340,7 +341,7 @@ function download(url, title, downloadAsAudio, youtubeUrl, saveAsTitleValue, art
           buttons: ['Ok'],
           defaultId: 2,
           title: 'Error',
-          message: '您打进的网址有问题. 请您把打进的网址重新看一遍， 然后重新再下载。谢谢！',
+          message: '您打进的网址有问题. 请您把打进的网址重新看一遍， 然后重新再下载。如国问题还没解决请您问周先生。谢谢！',
           detail: '-周先生',
           checkboxChecked: true,
         };
