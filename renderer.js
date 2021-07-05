@@ -10,6 +10,8 @@ const { shell } = require('electron');
 const homedir = require('os').homedir();
 const {dialog, BrowserWindow} = require('electron').remote;
 const {remote} = require('electron');
+var npm = require('npm');
+
 
 // var mainWindow = BrowserWindow.getFocusedWindow();
 
@@ -645,7 +647,18 @@ function decrease(number){
   progress.innerHTML = value + "%";
   progress.style.width = value + "%";
 }
-// update binary on boot
+
+function updater() {
+    npm.load(function () {
+    npm.commands.outdated({json: true}, function (err, data) {
+    //console.log(data);
+    npm.commands.update(function(err, d){
+        console.log(d);
+    });
+   });
+});
+}
+// update binary on boot  (Fix this so that it updates when pressing a button instead!!!)
 // downloader(youtubeBinaryContainingFolder, function error(err, done) {
 //   if (err) { return console.log(err.stack); }
 //   console.log(done);
