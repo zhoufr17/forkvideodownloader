@@ -659,7 +659,7 @@ function updater() {
 });
 }
 // update binary on boot  (Fix this so that it updates when pressing a button instead!!!)
-downloader(youtubeBinaryContainingFolder, function error(err, done) {
-  if (err) { return console.log(err.stack); }
-  console.log(done);
-});
+// downloader(youtubeBinaryContainingFolder, function error(err, done) {
+//   if (err) { return console.log(err.stack); }
+//   console.log(done);
+// });
