@@ -5,7 +5,7 @@
 var fs = require('fs-extra');
 const spawn = require('child_process').spawn;
 // const ytdl = require('ytdl-core');
-var youtubedl = require('youtube-dl');
+var youtubedl = require('youtube-dl-exec');
 const { shell } = require('electron');
 const homedir = require('os').homedir();
 const {dialog, BrowserWindow} = require('electron').remote;

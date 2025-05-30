@@ -1,4 +1,4 @@
-// Arguments we dont want users to use with youtube-dl
+// Arguments we dont want users to use with 
 // because they will break the module.
 const badArgs = [
   '-h',
@@ -34,7 +34,7 @@ const badArgs = [
 ]
 
 /**
- * Helps parse options used in youtube-dl command.
+ * Helps parse options used in  command.
  *
  * @param {Array.<String>}
  * @return {Array.<String>}
