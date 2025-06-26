@@ -4,25 +4,38 @@
 
 var fs = require('fs-extra');
 const spawn = require('child_process').spawn;
-// const ytdl = require('ytdl-core');
-var youtubedl = require('youtube-dl');
 const { shell } = require('electron');
 const homedir = require('os').homedir();
 const {dialog, BrowserWindow} = require('electron').remote;
 const {remote} = require('electron');
-var npm = require('npm');
-
-
-// var mainWindow = BrowserWindow.getFocusedWindow();
-
-const downloader = require('./downloadBinary');
+// var npm = require('npm');
 
 const ffmpeg = require('@ffmpeg-installer/ffmpeg');
 const ffmpegPath = require('@ffmpeg-installer/ffmpeg').path;
 console.log(`ffmpeg path: ${ffmpegPath}`);
 
-const youtubeBinaryFilePath = youtubedl.getYtdlBinary();
-console.log(`youtube-dl binary path: ${youtubeBinaryFilePath}`);
+const ytdlp = require('yt-dlp-exec');
+// let ytdlp;
+// try {
+//   ytdlp = require('yt-dlp-exec');
+// } catch (e) {
+//   console.error('Require failed:', e);
+// }
+
+// Example: You can specify options here
+// const downloadAudio = async (url) => {
+//   try {
+//     const output = await ytdlp(url, {
+//       format: 'bestaudio/best',   // Example: Download best audio
+//       extractAudio: true,         // Extract audio only
+//       audioFormat: 'mp3',         // Convert to mp3 format
+//     });
+//     console.log('Download complete:', output);
+//   } catch (error) {
+//     console.error('Error downloading video:', error);
+//   }
+// };
+
 
 // Progress Bar stuff
 var value = 0,
@@ -84,296 +97,384 @@ var downloadPlaylistText = document.getElementsByClassName(
   'downloadPlaylistText'
 )[0];
 
-// var url = 'https://www.youtube.com/watch?v=ZcAiayke00I';
-function download(url, title, downloadAsAudio, youtubeUrl, saveAsTitleValue, artistValue, saveToiTunesValue) {
-  let arguments = [];
+async function download(url, title, downloadAsAudio, youtubeUrl, saveAsTitleValue, artistValue, saveToiTunesValue) {
+  let options = {
+    // General download options
+    addMetadata: true,
+    ffmpegLocation: ffmpegPath,
+    ignoreErrors: true,
+    noMtime: true,
+  };
 
-  // set the url for ytdl
-  arguments.push(url);
+  console.log("flag 1")
 
-  // verbose output
-  arguments.push('-v');
-
-  // arguments.push('-f', 'bestvideo+bestaudio/best');
-
-  arguments.push('--add-metadata');
-
-  // arguments.push('--postprocessor-args');
-
-  // arguments.push("-metadata 'title=George Washington'");
-
-  // arguments.push('--postprocessor-args');
-  // arguments.push("-metadata 'artist=Pink Floyed'");
-  // arguments.push("artist=Pink Floyd")
-
-  arguments.push('--ffmpeg-location');
-
-  arguments.push(ffmpegPath);
-
-  arguments.push('--no-mtime');
-
-  arguments.push('--ignore-errors');
-
-  // increase(15);
-  updateProgressBar(18);
-  // select download as audio or video
+  // If downloading as audio
   if (downloadAsAudio) {
-
-    arguments.push('-f');
-
-    // arguments.push('bestaudio');
-
-    // don't want webm as audio
-    arguments.push('bestaudio[ext!=webm]');
-
-    /** conversion taking too long atm **/
-    arguments.push('--extract-audio');
-
-    arguments.push('--audio-format');
-
-    arguments.push('mp3');
-
-    // arguments.push('--add-metadata --postprocessor-args "-metadata artist=Pink\ Floyd"');
-
-
-    // can add something here later
+    options.format = 'bestaudio[ext!=webm]'; // Audio only (exclude webm)
+    options.extractAudio = true;
+    options.audioFormat = 'mp3';
   } else {
+    // Download the best video format
+    //option 1
+    // options.format = 'bestvideo[ext=mp4]+bestaudio[ext=m4a]/mp4';
 
-    // download as mp4 if it's youtube (tired of reconverting .flv files)
-    const isYouTubeDownload = url.match('youtube');
-    if(isYouTubeDownload){
-      console.log('downloading from youtube');
-
-      arguments.push('-f');
-
-      arguments.push('bestvideo[ext=mp4]+bestaudio[ext=m4a]/mp4');
-    }
-
-    // arguments.push('best');
+    //option 2
+    options.format = 'bestvideo+bestaudio/best';
+    options.recodeVideo = 'mp4';
   }
 
-  // increase(10);
-  updateProgressBar(28);
+  console.log("flag 2")
 
-  // // verbose output
+  // Metadata options
+  options.metadata = {
+    title: title || saveAsTitleValue,
+    artist: artistValue || ''
+  };
 
-  console.log(title);
+  // Replace slashes in title
+  title = title.replace(/\//g, '_');
 
-  // replace forward slashes with underscores
-  if (title) {
-    console.log(title);
-    title = title.replace(/\//g, '_');
-    console.log('replacing');
+  // Define the save path
+  const savePath = `${tempDirectory}/${title}.%(ext)s`;
+  options.output = savePath;
 
-  }
+  console.log("flag 3")
 
-  function somefunction(selector) {
-    return selector.replace(/(!|"|#|\$|%|\'|\(|\)|\*|\+|\,|\.|\/|\:|\;|\?|@)/g, function($1, $2) {
-        return "\\\\" + $2;
-    });
-  }
+  // Start download using yt-dlp
+  try {
+    // Start downloading
+    console.log(`Starting download: ${url}`);
 
-  function somefunction2(selector) {
-    console.log("replacing COLON");
-    return selector.replace(/:/g, '\uA789');
-  }
-  // replace colons
+    // Download video/audio using yt-dlp
+    await ytdlp(url, options);
+    console.log('Download completed!');
 
-  console.log("fixing title up: " + title);
-  if (title) {
-    title = somefunction2(title);
-  }
-  console.log("done fixing title: " + title);
-
-  // TODO: trim to max 255 letters
-
-  // title is that passed or the one from youtube
-  // const fileName = title || '%(title)s';
-  const fileName = title;
-
-
-  // console.log(title);
-
-  let inputtedUrl = selectVideoDirectoryInput.value;
-
-  console.log(inputtedUrl);
-
-  // create
-  // if (!fs.existsSync(inputtedUrl)) {
-  //   fs.mkdirp(inputtedUrl);
-  // }
-
-  // console.log(__dirname);
-
-  const filePath = inputtedUrl;
-  const tempFilePath = tempDirectory;
-
-  const fileExtension = `%(ext)s`;
-
-  let saveToFolder = `${tempFilePath}/${fileName}.${fileExtension}`;
-
-  console.log(saveToFolder);
-
-  // save to videos directory
-  arguments.push('-o', saveToFolder);
-
-  console.log(arguments);
-
-  console.log(arguments);
-  const ls = spawn(youtubeBinaryFilePath, arguments);
-  console.log(ls);
-
-  // increase(20);
-  updateProgressBar(48);
-
-  ls.stdout.on('data', data => {
-    percentage.innerText = data;
-
-    console.log(`stdout: ${data}`);
-  });
-
-  ls.stderr.on('data', data => {
-    percentage.innerText = data;
-
-    console.log(`stderr: ${data}`);
-  });
-
-  ls.on('close', code => {
-    playlistDownloadingDiv.style.display = 'none';
-    // increase(20);
-    updateProgressBar(68);
-
-
-    // ffmpeg -i default.mp4 -metadata title="my title" -codec copy output.mp4 && mv output.mp4 default.mp4
-    // ffmpeg -i input.mp3 -c copy -metadata artist="Someone" output.mp3
-    let ffarguments = [];
-    ffarguments.push('-y')
-    ffarguments.push('-i');
+    // If audio, rename to mp3
     if (downloadAsAudio) {
-      ffarguments.push(`${tempFilePath}/${fileName}.mp3`); //input for audio
+      const finalSavePath = `${dir}/${title}.mp3`;
+      console.log(finalSavePath)
+      fs.renameSync(savePath.replace('%(ext)s', 'mp3'), finalSavePath);
+      console.log('Audio saved as mp3');
     } else {
-      ffarguments.push(`${tempFilePath}/${fileName}.mp4`); //input for video
+      const finalSavePath = `${dir}/${title}.mp4`;
+      fs.renameSync(savePath.replace('%(ext)s', 'mp4'), finalSavePath);
+      console.log('Video saved as mp4');
     }
-    ffarguments.push('-c');
-    ffarguments.push('copy')
 
-    if (artistValue != '') {
-      ffarguments.push('-metadata');
-      var customArtist = 'artist=' + artistValue;
-      ffarguments.push(customArtist);
-    }
-    ffarguments.push('-metadata');
-    var customTitle = 'title=' + title;
-    ffarguments.push(customTitle);
-
-    let finalSaveLocation = `${filePath}/${fileName}.${fileExtension}`;
-
-    if (downloadAsAudio) {
-      finalSaveLocation = `${filePath}/${fileName}.mp3`;
-    } else {
-      finalSaveLocation = `${filePath}/${fileName}.mp4`;
-    }
-    // `${homedir}/Music/iTunes/iTunes Media/Automatically Add to iTunes/`
+    // Handle iTunes saving
     if (saveToiTunesValue) {
-      finalSaveLocation = `${homedir}/Music/iTunes/iTunes Media/Automatically Add to iTunes/${fileName}.mp3`;
-    }
-    ffarguments.push(finalSaveLocation) //output location
-    console.log("FINAL LOCATION!!!!!!!!!!")
-    console.log(finalSaveLocation);
-    const ffls = spawn(ffmpegPath, ffarguments);
-
-    // increase(10);
-    updateProgressBar(78);
-    ffls.stdout.on('data', data => {
-      percentage.innerText = data;
-
-      console.log(`stdout!!!: ${data}`);
-    });
-
-    ffls.stderr.on('data', data => {
-      percentage.innerText = data;
-
-      console.log(`stderr!!!: ${data}`);
-    });
-
-    ffls.on('close', fcode => {
-      console.log("Cleanup files RN!!!")
-      updateProgressBar(98);
-
-      if (fcode == 0) {
-
-        percentage.innerText = 'Download Completed! (下载完成了！）';
-        // increase(20);
-        if (downloadAsAudio) {
-          fs.unlink(`${tempFilePath}/${fileName}.mp3`, (err => {
-            if (err) console.log(err);
-            else {
-              console.log("\nDeleted temp file: mp3");
-            }
-          }));
-        } else {
-          fs.unlink(`${tempFilePath}/${fileName}.mp4`, (err => {
-            if (err) console.log(err);
-            else {
-              console.log("\nDeleted temp file: mp4");
-            }
-          }));
-        }
-          // clear out inputs after
-        titleDiv.style.display = '';
-        youtubeUrl.value = '';
-        console.log("Youtube url value: " + youtubeUrl.value);
-        saveAsTitleValue.value = '';
-        console.log("saveAsTitleValue value: " + saveAsTitleValue.value);
-        // artistValue.value = '';
-
-        //fix this spaghetti code later!!!
-        var artistSauce = document.getElementById(
-          'artist'
-        );
-        artistSauce.value = '';
-        console.log("artistValue value: " + artistValue);
-
-      } else {
-
-        percentage.innerText = 'ERROR: 您打进的网址有问题! 请您把打进的网址重新看一遍. 谢谢！';
-
-        const options = {
-          type: 'error',
-          buttons: ['Ok'],
-          defaultId: 2,
-          title: 'Error',
-          message: '您打进的网址有问题. 请您把打进的网址重新看一遍， 然后重新再下载。如国问题还没解决请您问周先生。谢谢！',
-          detail: '-周先生',
-          checkboxChecked: true,
-        };
-
-        dialog.showMessageBox(remote.getCurrentWindow(), options, (response, checkboxChecked) => {
-          console.log(response);
-          console.log(checkboxChecked);
-        });
-
-      }
-
-      console.log(`child process exited with code ffmpeg ${code}`);
-    });
-    // if it ends successfully say download completed
-    if (code == 0) {
-      percentage.innerText = 'Download completed';
-    } else {
-      percentage.innerText = 'Error: Please double check video URL and try download again.';
+      const iTunesPath = `${homedir}/Music/iTunes/iTunes Media/Automatically Add to iTunes/${title}.mp3`;
+      fs.renameSync(savePath.replace('%(ext)s', 'mp3'), iTunesPath);
+      console.log('File saved to iTunes');
     }
 
+    console.log("flag 4")
 
-
-    console.log(`child process exited with code ${code}`);
-
-    // Progress bar cleanup
-    // barDiv.style.display = "none";
-    // decrease(1000);
-
-  });
+    // Remove temporary files
+    // fs.unlinkSync(savePath.replace('%(ext)s', 'mp3'));
+    // fs.unlinkSync(savePath.replace('%(ext)s', 'mp4'));
+  } catch (error) {
+    console.error('Download failed:', error);
+    dialog.showMessageBox(remote.getCurrentWindow(), {
+      type: 'error',
+      buttons: ['Ok'],
+      defaultId: 2,
+      title: 'Download Error',
+      message: 'An error occurred while downloading. Please check the URL and try again.',
+    });
+  }
 }
+
+// var url = 'https://www.youtube.com/watch?v=ZcAiayke00I';
+// function download(url, title, downloadAsAudio, youtubeUrl, saveAsTitleValue, artistValue, saveToiTunesValue) {
+//   let arguments = [];
+
+//   // set the url for ytdl
+//   arguments.push(url);
+
+//   // verbose output
+//   arguments.push('-v');
+
+//   // arguments.push('-f', 'bestvideo+bestaudio/best');
+
+//   arguments.push('--add-metadata');
+
+//   // arguments.push('--postprocessor-args');
+
+//   // arguments.push("-metadata 'title=George Washington'");
+
+//   // arguments.push('--postprocessor-args');
+//   // arguments.push("-metadata 'artist=Pink Floyed'");
+//   // arguments.push("artist=Pink Floyd")
+
+//   arguments.push('--ffmpeg-location');
+
+//   arguments.push(ffmpegPath);
+
+//   arguments.push('--no-mtime');
+
+//   arguments.push('--ignore-errors');
+
+//   // increase(15);
+//   updateProgressBar(18);
+//   // select download as audio or video
+//   if (downloadAsAudio) {
+
+//     arguments.push('-f');
+
+//     // arguments.push('bestaudio');
+
+//     // don't want webm as audio
+//     arguments.push('bestaudio[ext!=webm]');
+
+//     /** conversion taking too long atm **/
+//     arguments.push('--extract-audio');
+
+//     arguments.push('--audio-format');
+
+//     arguments.push('mp3');
+
+//     // arguments.push('--add-metadata --postprocessor-args "-metadata artist=Pink\ Floyd"');
+
+
+//     // can add something here later
+//   } else {
+
+//     // download as mp4 if it's youtube (tired of reconverting .flv files)
+//     const isYouTubeDownload = url.match('youtube');
+//     if(isYouTubeDownload){
+//       console.log('downloading from youtube');
+
+//       arguments.push('-f');
+
+//       arguments.push('bestvideo[ext=mp4]+bestaudio[ext=m4a]/mp4');
+//     }
+
+//     // arguments.push('best');
+//   }
+
+//   // increase(10);
+//   updateProgressBar(28);
+
+//   // // verbose output
+
+//   console.log(title);
+
+//   // replace forward slashes with underscores
+//   if (title) {
+//     console.log(title);
+//     title = title.replace(/\//g, '_');
+//     console.log('replacing');
+
+//   }
+
+//   function somefunction(selector) {
+//     return selector.replace(/(!|"|#|\$|%|\'|\(|\)|\*|\+|\,|\.|\/|\:|\;|\?|@)/g, function($1, $2) {
+//         return "\\\\" + $2;
+//     });
+//   }
+
+//   function somefunction2(selector) {
+//     console.log("replacing COLON");
+//     return selector.replace(/:/g, '\uA789');
+//   }
+//   // replace colons
+
+//   console.log("fixing title up: " + title);
+//   if (title) {
+//     title = somefunction2(title);
+//   }
+//   console.log("done fixing title: " + title);
+
+//   // TODO: trim to max 255 letters
+
+//   // title is that passed or the one from youtube
+//   // const fileName = title || '%(title)s';
+//   const fileName = title;
+
+
+//   // console.log(title);
+
+//   let inputtedUrl = selectVideoDirectoryInput.value;
+
+//   console.log(inputtedUrl);
+
+//   // create
+//   // if (!fs.existsSync(inputtedUrl)) {
+//   //   fs.mkdirp(inputtedUrl);
+//   // }
+
+//   // console.log(__dirname);
+
+//   const filePath = inputtedUrl;
+//   const tempFilePath = tempDirectory;
+
+//   const fileExtension = `%(ext)s`;
+
+//   let saveToFolder = `${tempFilePath}/${fileName}.${fileExtension}`;
+
+//   console.log(saveToFolder);
+
+//   // save to videos directory
+//   arguments.push('-o', saveToFolder);
+
+//   console.log(arguments);
+
+//   console.log(arguments);
+//   const ls = spawn(youtubeBinaryFilePath, arguments);
+//   console.log(ls);
+
+//   // increase(20);
+//   updateProgressBar(48);
+
+//   ls.stdout.on('data', data => {
+//     percentage.innerText = data;
+
+//     console.log(`stdout: ${data}`);
+//   });
+
+//   ls.stderr.on('data', data => {
+//     percentage.innerText = data;
+
+//     console.log(`stderr: ${data}`);
+//   });
+
+//   ls.on('close', code => {
+//     playlistDownloadingDiv.style.display = 'none';
+//     // increase(20);
+//     updateProgressBar(68);
+
+
+//     // ffmpeg -i default.mp4 -metadata title="my title" -codec copy output.mp4 && mv output.mp4 default.mp4
+//     // ffmpeg -i input.mp3 -c copy -metadata artist="Someone" output.mp3
+//     let ffarguments = [];
+//     ffarguments.push('-y')
+//     ffarguments.push('-i');
+//     if (downloadAsAudio) {
+//       ffarguments.push(`${tempFilePath}/${fileName}.mp3`); //input for audio
+//     } else {
+//       ffarguments.push(`${tempFilePath}/${fileName}.mp4`); //input for video
+//     }
+//     ffarguments.push('-c');
+//     ffarguments.push('copy')
+
+//     if (artistValue != '') {
+//       ffarguments.push('-metadata');
+//       var customArtist = 'artist=' + artistValue;
+//       ffarguments.push(customArtist);
+//     }
+//     ffarguments.push('-metadata');
+//     var customTitle = 'title=' + title;
+//     ffarguments.push(customTitle);
+
+//     let finalSaveLocation = `${filePath}/${fileName}.${fileExtension}`;
+
+//     if (downloadAsAudio) {
+//       finalSaveLocation = `${filePath}/${fileName}.mp3`;
+//     } else {
+//       finalSaveLocation = `${filePath}/${fileName}.mp4`;
+//     }
+//     // `${homedir}/Music/iTunes/iTunes Media/Automatically Add to iTunes/`
+//     if (saveToiTunesValue) {
+//       finalSaveLocation = `${homedir}/Music/iTunes/iTunes Media/Automatically Add to iTunes/${fileName}.mp3`;
+//     }
+//     ffarguments.push(finalSaveLocation) //output location
+//     console.log("FINAL LOCATION!!!!!!!!!!")
+//     console.log(finalSaveLocation);
+//     const ffls = spawn(ffmpegPath, ffarguments);
+
+//     // increase(10);
+//     updateProgressBar(78);
+//     ffls.stdout.on('data', data => {
+//       percentage.innerText = data;
+
+//       console.log(`stdout!!!: ${data}`);
+//     });
+
+//     ffls.stderr.on('data', data => {
+//       percentage.innerText = data;
+
+//       console.log(`stderr!!!: ${data}`);
+//     });
+
+//     ffls.on('close', fcode => {
+//       console.log("Cleanup files RN!!!")
+//       updateProgressBar(98);
+
+//       if (fcode == 0) {
+
+//         percentage.innerText = 'Download Completed! (下载完成了！）';
+//         // increase(20);
+//         if (downloadAsAudio) {
+//           fs.unlink(`${tempFilePath}/${fileName}.mp3`, (err => {
+//             if (err) console.log(err);
+//             else {
+//               console.log("\nDeleted temp file: mp3");
+//             }
+//           }));
+//         } else {
+//           fs.unlink(`${tempFilePath}/${fileName}.mp4`, (err => {
+//             if (err) console.log(err);
+//             else {
+//               console.log("\nDeleted temp file: mp4");
+//             }
+//           }));
+//         }
+//           // clear out inputs after
+//         titleDiv.style.display = '';
+//         youtubeUrl.value = '';
+//         console.log("Youtube url value: " + youtubeUrl.value);
+//         saveAsTitleValue.value = '';
+//         console.log("saveAsTitleValue value: " + saveAsTitleValue.value);
+//         // artistValue.value = '';
+
+//         //fix this spaghetti code later!!!
+//         var artistSauce = document.getElementById(
+//           'artist'
+//         );
+//         artistSauce.value = '';
+//         console.log("artistValue value: " + artistValue);
+
+//       } else {
+
+//         percentage.innerText = 'ERROR: 您打进的网址有问题! 请您把打进的网址重新看一遍. 谢谢！';
+
+//         const options = {
+//           type: 'error',
+//           buttons: ['Ok'],
+//           defaultId: 2,
+//           title: 'Error',
+//           message: '您打进的网址有问题. 请您把打进的网址重新看一遍， 然后重新再下载。如国问题还没解决请您问周先生。谢谢！',
+//           detail: '-周先生',
+//           checkboxChecked: true,
+//         };
+
+//         dialog.showMessageBox(remote.getCurrentWindow(), options, (response, checkboxChecked) => {
+//           console.log(response);
+//           console.log(checkboxChecked);
+//         });
+
+//       }
+
+//       console.log(`child process exited with code ffmpeg ${code}`);
+//     });
+//     // if it ends successfully say download completed
+//     if (code == 0) {
+//       percentage.innerText = 'Download completed';
+//     } else {
+//       percentage.innerText = 'Error: Please double check video URL and try download again.';
+//     }
+
+
+
+//     console.log(`child process exited with code ${code}`);
+
+//     // Progress bar cleanup
+//     // barDiv.style.display = "none";
+//     // decrease(1000);
+
+//   });
+// }
 
 // start download button
 var startDownload = document.getElementsByClassName('startDownload')[0];
@@ -465,13 +566,19 @@ startDownload.onclick = function() {
   }
 };
 
-function youtubeDlInfoAsync(url, options) {
-  return new Promise(function(resolve, reject) {
-    youtubedl.getInfo(url, options, function(err, data) {
-      if (err !== null) reject(err);
-      else resolve(data);
-    });
-  });
+// function youtubeDlInfoAsync(url, options) {
+//   return new Promise(function(resolve, reject) {
+//     youtubedl.getInfo(url, options, function(err, data) {
+//       if (err !== null) reject(err);
+//       else resolve(data);
+//     });
+//   });
+// }
+
+
+
+function youtubeDlInfoAsync(url, options = []) {
+  return ytdlp(url, options);
 }
 
 async function populateTitle() {
@@ -612,10 +719,49 @@ const selectVideoDirectory = (selectVideoDirectoryButton.onclick = function() {
 
 });
 
-// remove youtubedl from pathname to give containing folder
-const youtubeBinaryContainingFolder = youtubeBinaryFilePath.substr(0, youtubeBinaryFilePath.lastIndexOf("\/"));
+// probably delete later
+// selectVideoDirectoryButton.onclick = async function() {
+//   try {
+//     console.log("hi")
+//     // Show the open directory dialog and await its result
+//     const selectedPath = await dialog.showOpenDialog({
+//       defaultPath: './',
+//       properties: ['openDirectory']
+//     });
 
-console.log(`youtubeBinaryContainingFolder: ${youtubeBinaryContainingFolder}`);
+//     // If the user cancels the dialog or selects nothing, exit
+//     if (selectedPath.canceled || selectedPath.filePaths.length === 0) {
+//       console.log('No directory selected');
+//       return;
+//     }
+
+//     // Get the selected path (first path in the array)
+//     const selectedFolderPath = selectedPath.filePaths[0];
+//     console.log('Selected Path:', selectedFolderPath);
+
+//     // Adjust the path based on __dirname
+//     const relativePath = selectedFolderPath.split(__dirname)[1];
+//     let adjustedUrlWithCurrentDirectory;
+//     if (relativePath) {
+//       adjustedUrlWithCurrentDirectory = `.${relativePath}`;
+//     } else {
+//       adjustedUrlWithCurrentDirectory = selectedFolderPath;
+//     }
+
+//     console.log('Adjusted Path:', adjustedUrlWithCurrentDirectory);
+
+//     // Assuming selectVideoDirectoryInput is the input element where the path is shown
+//     const selectVideoDirectoryInput = document.getElementById('selectVideoDirectoryInput');
+//     selectVideoDirectoryInput.value = adjustedUrlWithCurrentDirectory;
+
+//     // Now you can perform your fs-extra operation if needed (e.g., ensure directory exists)
+//     await fs.ensureDir(adjustedUrlWithCurrentDirectory);
+//     console.log(`Directory ensured: ${adjustedUrlWithCurrentDirectory}`);
+
+//   } catch (error) {
+//     console.error('Error selecting directory:', error);
+//   }
+// };
 
 // function increase(number){
 //   value += number;// same as value += 1, but better
@@ -624,6 +770,7 @@ console.log(`youtubeBinaryContainingFolder: ${youtubeBinaryContainingFolder}`);
 //   progress.innerHTML = value + "%";
 //   progress.style.width = value + "%";// set the width of the progress bar
 // }
+
 function updateProgressBar(max) {
   var percentage = max;
   // var curr = progressBar.value;

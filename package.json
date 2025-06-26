@@ -7,7 +7,7 @@
     "@ffmpeg-installer/ffmpeg": "^1.0.19",
     "ffmpeg": "0.0.4",
     "fs-extra": "^8.1.0",
-    "youtube-dl": "^2.0.0",
+    "yt-dlp-exec": "^1.0.2",
     "ytdl-core": "^0.29.2"
   },
   "devDependencies": {
