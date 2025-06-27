@@ -15,6 +15,8 @@ const ffmpegPath = require('@ffmpeg-installer/ffmpeg').path;
 console.log(`ffmpeg path: ${ffmpegPath}`);
 
 const ytdlp = require('yt-dlp-exec');
+
+//don't use, wanted to test
 // let ytdlp;
 // try {
 //   ytdlp = require('yt-dlp-exec');
@@ -22,7 +24,6 @@ const ytdlp = require('yt-dlp-exec');
 //   console.error('Require failed:', e);
 // }
 
-// Example: You can specify options here
 // const downloadAudio = async (url) => {
 //   try {
 //     const output = await ytdlp(url, {
@@ -97,6 +98,7 @@ var downloadPlaylistText = document.getElementsByClassName(
   'downloadPlaylistText'
 )[0];
 
+// new download using ytdlp (https://github.com/yt-dlp/yt-dlp)
 async function download(url, title, downloadAsAudio, youtubeUrl, saveAsTitleValue, artistValue, saveToiTunesValue) {
   let options = {
     // General download options
@@ -107,8 +109,9 @@ async function download(url, title, downloadAsAudio, youtubeUrl, saveAsTitleValu
   };
 
   console.log("flag 1")
+  // updateProgressBar(18);
 
-  // If downloading as audio
+  // choose download audio or video
   if (downloadAsAudio) {
     options.format = 'bestaudio[ext!=webm]'; // Audio only (exclude webm)
     options.extractAudio = true;
@@ -124,6 +127,7 @@ async function download(url, title, downloadAsAudio, youtubeUrl, saveAsTitleValu
   }
 
   console.log("flag 2")
+  // updateProgressBar(28);
 
   // Metadata options
   options.metadata = {
@@ -144,12 +148,19 @@ async function download(url, title, downloadAsAudio, youtubeUrl, saveAsTitleValu
   try {
     // Start downloading
     console.log(`Starting download: ${url}`);
+    percentage.innerText = 'Starting download';
 
     // Download video/audio using yt-dlp
     await ytdlp(url, options);
     console.log('Download completed!');
+    updateProgressBar(98);
+    percentage.innerText = 'Download completed';
 
-    // If audio, rename to mp3
+    //original chiense version
+    // percentage.innerText = 'Download Completed! (下载完成了！）';
+
+    // Audio: rename to mp3
+    // Video: rename to mp4
     if (downloadAsAudio) {
       const finalSavePath = `${dir}/${title}.mp3`;
       console.log(finalSavePath)
@@ -167,14 +178,21 @@ async function download(url, title, downloadAsAudio, youtubeUrl, saveAsTitleValu
       fs.renameSync(savePath.replace('%(ext)s', 'mp3'), iTunesPath);
       console.log('File saved to iTunes');
     }
+    
+    // old version
+    // if (saveToiTunesValue) {
+    //   finalSaveLocation = `${homedir}/Music/iTunes/iTunes Media/Automatically Add to iTunes/${fileName}.mp3`;
+    // }
 
     console.log("flag 4")
 
-    // Remove temporary files
-    // fs.unlinkSync(savePath.replace('%(ext)s', 'mp3'));
-    // fs.unlinkSync(savePath.replace('%(ext)s', 'mp4'));
   } catch (error) {
     console.error('Download failed:', error);
+    percentage.innerText = 'Error: Please double check video URL and try download again.';
+
+    //original chiense version
+    // percentage.innerText = 'ERROR: 您打进的网址有问题! 请您把打进的网址重新看一遍. 谢谢！';
+
     dialog.showMessageBox(remote.getCurrentWindow(), {
       type: 'error',
       buttons: ['Ok'],
@@ -182,7 +200,35 @@ async function download(url, title, downloadAsAudio, youtubeUrl, saveAsTitleValu
       title: 'Download Error',
       message: 'An error occurred while downloading. Please check the URL and try again.',
     });
+
+    //original chiense version
+    // dialog.showMessageBox(remote.getCurrentWindow(), {
+    //   type: 'error',
+    //   buttons: ['Ok'],
+    //   defaultId: 2,
+    //   title: 'Error',
+    //   message: '您打进的网址有问题. 请您把打进的网址重新看一遍， 然后重新再下载。如国问题还没解决请您问周先生。谢谢！',
+    //   detail: '-周先生',
+    //   checkboxChecked: true,
+    // })
   }
+  
+  // clear out inputs after
+  titleDiv.style.display = '';
+  youtubeUrl.value = '';
+  console.log("Youtube url value: " + youtubeUrl.value);
+  saveAsTitleValue.value = '';
+  console.log("saveAsTitleValue value: " + saveAsTitleValue.value);
+
+  var artistSauce = document.getElementById('artist');
+  artistSauce.value = '';
+  console.log("artistValue value: " + artistValue);
+
+  console.log("flag 4")
+
+  // Progress bar cleanup
+  barDiv.style.display = "none";
+  decrease(1000);
 }
 
 // var url = 'https://www.youtube.com/watch?v=ZcAiayke00I';
