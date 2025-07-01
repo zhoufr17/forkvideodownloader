@@ -108,7 +108,7 @@ async function download(url, title, downloadAsAudio, youtubeUrl, saveAsTitleValu
     noMtime: true,
     progress: true,
     noPlaylist: true,
-    windowsFilenames: true,
+    consoleTitle: true
   };
 
   console.log("flag 1")
@@ -146,17 +146,16 @@ async function download(url, title, downloadAsAudio, youtubeUrl, saveAsTitleValu
   options.output = savePath;
 
   console.log("flag 3")
-  decrease(5)
 
   // Start download using yt-dlp
   try {
     // Start downloading
     console.log(`Starting download: ${url}`);
     percentage.innerText = 'Starting download';
+    updateProgressBar(67); //nice
 
     // Download video/audio using yt-dlp
     await ytdlp(url, options);
-    updateProgressBar(98);
     console.log('Download completed!');
     
     percentage.innerText = 'Download completed';
@@ -177,6 +176,7 @@ async function download(url, title, downloadAsAudio, youtubeUrl, saveAsTitleValu
       console.log('Video saved as mp4');
     }
 
+    //currently has errors
     // Handle iTunes saving
     if (saveToiTunesValue) {
       const iTunesPath = `${homedir}/Music/iTunes/iTunes Media/Automatically Add to iTunes/${title}.mp3`;
