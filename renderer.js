@@ -100,12 +100,15 @@ var downloadPlaylistText = document.getElementsByClassName(
 
 // new download using ytdlp (https://github.com/yt-dlp/yt-dlp)
 async function download(url, title, downloadAsAudio, youtubeUrl, saveAsTitleValue, artistValue, saveToiTunesValue) {
+  // Download options
   let options = {
-    // General download options
     addMetadata: true,
     ffmpegLocation: ffmpegPath,
     ignoreErrors: true,
     noMtime: true,
+    progress: true,
+    noPlaylist: true,
+    windowsFilenames: true,
   };
 
   console.log("flag 1")
@@ -143,6 +146,7 @@ async function download(url, title, downloadAsAudio, youtubeUrl, saveAsTitleValu
   options.output = savePath;
 
   console.log("flag 3")
+  decrease(5)
 
   // Start download using yt-dlp
   try {
@@ -152,8 +156,9 @@ async function download(url, title, downloadAsAudio, youtubeUrl, saveAsTitleValu
 
     // Download video/audio using yt-dlp
     await ytdlp(url, options);
-    console.log('Download completed!');
     updateProgressBar(98);
+    console.log('Download completed!');
+    
     percentage.innerText = 'Download completed';
 
     //original chiense version
