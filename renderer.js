@@ -136,7 +136,7 @@ async function download(url, title, downloadAsAudio, youtubeUrl, saveAsTitleValu
   console.log("flag 2")
   // updateProgressBar(28);
 
-  // Metadata options
+  // Metadata options (doesn't seem to carry over to itunes)
   options.metadata = {
     title: title || saveAsTitleValue,
     artist: artistValue || ''
@@ -144,6 +144,14 @@ async function download(url, title, downloadAsAudio, youtubeUrl, saveAsTitleValu
 
   // Replace slashes in title
   title = title.replace(/\//g, '_');
+
+  // Windows improper characters: < > : " / \ | ? *
+  // removes all improper characters for windows desktop
+  // title = title.replace(/[<>:"/\\|?*]/g, '');
+
+  // removes all improper characters for windows desktop but the slashes
+  title = title.replace(/[<>:"|?*]/g, ' ');
+
 
   // Define the save path
   const savePath = `${tempDirectory}/${title}.%(ext)s`;
@@ -178,8 +186,18 @@ async function download(url, title, downloadAsAudio, youtubeUrl, saveAsTitleValu
       // Handle iTunes saving
       if (saveToiTunesValue) {
         const iTunesPath = `${homedir}/Music/iTunes/iTunes Media/Automatically Add to iTunes/${title}.mp3`;
-        fs.copyFileSync(finalSavePath, iTunesPath);
-        console.log('File saved to iTunes');
+        // fs.copyFileSync(finalSavePath, iTunesPath);
+        // console.log('File saved to iTunes');
+
+        // adds title and artist to itunes
+        const ffmpeg_name = spawn(ffmpegPath, [
+          '-i', finalSavePath,
+          '-map_metadata', '-1', // removes all metadata
+          '-codec', 'copy',
+          '-metadata', `title=${title}`,
+          '-metadata', `artist=${artistValue}`,
+          iTunesPath
+        ]);
       }
     } else {
       const finalSavePath = `${dir}/${title}.mp4`;
@@ -188,6 +206,23 @@ async function download(url, title, downloadAsAudio, youtubeUrl, saveAsTitleValu
     }
 
     console.log("flag 4")
+
+    // clear out inputs after
+    titleDiv.style.display = '';
+    youtubeUrl.value = '';
+    console.log("Youtube url value: " + youtubeUrl.value);
+    saveAsTitleValue.value = '';
+    console.log("saveAsTitleValue value: " + saveAsTitleValue.value);
+
+    var artistSauce = document.getElementById('artist');
+    artistSauce.value = '';
+    console.log("artistValue value: " + artistValue);
+
+    console.log("flag 4")
+
+    // Progress bar cleanup
+    barDiv.style.display = "none";
+    decrease(1000);
 
   } catch (error) {
     console.error('Download failed:', error);
@@ -201,7 +236,7 @@ async function download(url, title, downloadAsAudio, youtubeUrl, saveAsTitleValu
       buttons: ['Ok'],
       defaultId: 2,
       title: 'Download Error',
-      message: 'An error occurred while downloading. Please check the URL and try again.',
+      message: 'An error occurred while downloading. Please check the URL/title and try again.',
     });
 
     //original chiense version
@@ -214,25 +249,27 @@ async function download(url, title, downloadAsAudio, youtubeUrl, saveAsTitleValu
     //   detail: '-周先生',
     //   checkboxChecked: true,
     // })
+
+    barDiv.style.display = "none";
   }
  
   
-  // clear out inputs after
-  titleDiv.style.display = '';
-  youtubeUrl.value = '';
-  console.log("Youtube url value: " + youtubeUrl.value);
-  saveAsTitleValue.value = '';
-  console.log("saveAsTitleValue value: " + saveAsTitleValue.value);
+  // // clear out inputs after
+  // titleDiv.style.display = '';
+  // youtubeUrl.value = '';
+  // console.log("Youtube url value: " + youtubeUrl.value);
+  // saveAsTitleValue.value = '';
+  // console.log("saveAsTitleValue value: " + saveAsTitleValue.value);
 
-  var artistSauce = document.getElementById('artist');
-  artistSauce.value = '';
-  console.log("artistValue value: " + artistValue);
+  // var artistSauce = document.getElementById('artist');
+  // artistSauce.value = '';
+  // console.log("artistValue value: " + artistValue);
 
-  console.log("flag 4")
+  // console.log("flag 4")
 
-  // Progress bar cleanup
-  barDiv.style.display = "none";
-  decrease(1000);
+  // // Progress bar cleanup
+  // barDiv.style.display = "none";
+  // decrease(1000);
 }
 
 // var url = 'https://www.youtube.com/watch?v=ZcAiayke00I';
