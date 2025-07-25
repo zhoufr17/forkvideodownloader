@@ -175,18 +175,6 @@ async function download(url, title, downloadAsAudio, youtubeUrl, saveAsTitleValu
       fs.renameSync(savePath.replace('%(ext)s', 'mp3'), finalSavePath);
       console.log('Audio saved as mp3');
 
-      // const finalSavePath = '/path/to/file.mp3';
-      // const tempSavePath = finalSavePath + '.temp';
-    
-      // const ffmpeg = spawn('ffmpeg', [
-      //   '-i', finalSavePath,
-      //   '-codec', 'copy',
-      //   '-metadata', 'title=Headlines',
-      //   '-metadata', 'artist=Drake',
-      //   '-metadata', 'album=Take Care',
-      //   tempSavePath
-      // ]);
-
       // Handle iTunes saving
       if (saveToiTunesValue) {
         const iTunesPath = `${homedir}/Music/iTunes/iTunes Media/Automatically Add to iTunes/${title}.mp3`;
@@ -227,122 +215,7 @@ async function download(url, title, downloadAsAudio, youtubeUrl, saveAsTitleValu
     //   checkboxChecked: true,
     // })
   }
-  
-  // ffmpeg.stderr.on('data', data => console.error(`ffmpeg: ${data}`));
-  
-  // ffmpeg.on('close', code => {
-  //   if (code === 0) {
-  //     fs.renameSync(tempSavePath, finalSavePath); // overwrite original with tagged version
-  //     console.log(`✅ Metadata applied to: ${finalSavePath}`);
-  //   } else {
-  //     console.error('❌ ffmpeg failed');
-  //   }
-  // });
-
-
-  // ffmpeg.on('close', (code) => {
-  //   // This callback runs when the ffmpeg process exits
-  //   if (code === 0) {
-  //     console.log('Process finished successfully');
-  //   } else {
-  //     console.error('Process exited with error code:', code);
-  //   }
-  // });
-
-// const inputFile = 'myfile.mp3';
-// const tempOutput = 'temp_output.mp3';
-// const finalFile = 'tagged_final.mp3';
-
-// const ffmpeg = spawn('ffmpeg', [
-//   '-i', inputFile,
-//   '-codec', 'copy',
-//   '-metadata', 'title=Final Title',
-//   '-metadata', 'artist=Cool Artist',
-//   tempOutput
-// ]);
-
-// ffmpeg.on('close', (code) => {
-//   if (code === 0) {
-//     fs.renameSync(tempOutput, finalFile);
-//     console.log(`Metadata added and saved as: ${finalFile}`);
-//   } else {
-//     console.error('FFmpeg failed');
-//   }
-// });
-
-
-  // const tempFile = 'downloaded.mp3';
-  
-  // // Step 1: Modify metadata using ffmpeg
-  // const ffmpeg = spawn('ffmpeg', [
-  //   '-i', tempFile,
-  //   '-codec', 'copy',
-  //   '-metadata', `title=${title}`,
-  //   '-metadata', 'artist=Drake',
-  //   '-metadata', 'album=Take Care',
-  //   'temp_output.mp3'
-  // ]);
-  
-  // ffmpeg.on('close', (code) => {
-  //   if (code === 0) {
-  //     // Step 2: Rename to final path
-  //     fs.renameSync('temp_output.mp3', finalSavePath);
-  //     console.log(`Saved as: ${finalSavePath}`);
-  //   } else {
-  //     console.error('ffmpeg failed');
-  //   }
-  // });
-
-
-
-//   if (title) {
-//     console.log(title);
-//     title = title.replace(/\//g, '_');
-//     console.log('replacing');
-
-//   }
-
-//     // ffmpeg -i default.mp4 -metadata title="my title" -codec copy output.mp4 && mv output.mp4 default.mp4
-//     // ffmpeg -i input.mp3 -c copy -metadata artist="Someone" output.mp3
-    let ffarguments = [];
-    ffarguments.push('-y')
-    ffarguments.push('-i');
-    if (downloadAsAudio) {
-      ffarguments.push(`${tempFilePath}/${fileName}.mp3`); //input for audio
-    } else {
-      ffarguments.push(`${tempFilePath}/${fileName}.mp4`); //input for video
-    }
-    ffarguments.push('-c');
-    ffarguments.push('copy')
-
-    if (artistValue != '') {
-      ffarguments.push('-metadata');
-      var customArtist = 'artist=' + artistValue;
-      ffarguments.push(customArtist);
-    }
-    ffarguments.push('-metadata');
-    var customTitle = 'title=' + title;
-    ffarguments.push(customTitle);
-
-    let finalSaveLocation = `${filePath}/${fileName}.${fileExtension}`;
-
-    if (downloadAsAudio) {
-      finalSaveLocation = `${filePath}/${fileName}.mp3`;
-    } else {
-      finalSaveLocation = `${filePath}/${fileName}.mp4`;
-    }
-    // `${homedir}/Music/iTunes/iTunes Media/Automatically Add to iTunes/`
-    if (saveToiTunesValue) {
-      finalSaveLocation = `${homedir}/Music/iTunes/iTunes Media/Automatically Add to iTunes/${fileName}.mp3`;
-    }
-    ffarguments.push(finalSaveLocation) //output location
-    console.log("FINAL LOCATION!!!!!!!!!!")
-    console.log(finalSaveLocation);
-    const ffls = spawn(ffmpegPath, ffarguments);
-
-
-
-
+ 
   
   // clear out inputs after
   titleDiv.style.display = '';
