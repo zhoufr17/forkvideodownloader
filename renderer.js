@@ -170,10 +170,10 @@ async function download(url, title, downloadAsAudio, youtubeUrl, saveAsTitleValu
     await ytdlp(url, options);
     console.log('Download completed!');
     
-    percentage.innerText = 'Download completed';
+    // percentage.innerText = 'Download completed';
 
-    //original chiense version
-    // percentage.innerText = 'Download Completed! (下载完成了！）';
+    //original chinese version
+    percentage.innerText = 'Download Completed! (下载完成了！）';
 
     // Audio: rename to mp3
     // Video: rename to mp4
@@ -238,10 +238,10 @@ async function download(url, title, downloadAsAudio, youtubeUrl, saveAsTitleValu
     decrease(1000);
 
   } catch (error) {
-    // console.error('Download failed:', error);
+    console.error('Download failed:', error);
     // percentage.innerText = 'Error: Please double check video URL and try download again.';
 
-    //original chiense version
+    //original chinese version
     percentage.innerText = 'ERROR: 您打进的网址有问题! 请您把打进的网址重新看一遍. 谢谢！';
 
     // dialog.showMessageBox(remote.getCurrentWindow(), {
@@ -252,7 +252,7 @@ async function download(url, title, downloadAsAudio, youtubeUrl, saveAsTitleValu
     //   message: 'An error occurred while downloading. Please check the URL/title and try again.',
     // });
 
-    //original chiense version
+    //original chinese version
     dialog.showMessageBox(remote.getCurrentWindow(), {
       type: 'error',
       buttons: ['Ok'],
