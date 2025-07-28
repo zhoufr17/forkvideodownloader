@@ -181,6 +181,7 @@ async function download(url, title, downloadAsAudio, youtubeUrl, saveAsTitleValu
       const finalSavePath = `${dir}/${title}.mp3`;
       console.log(finalSavePath)
       fs.renameSync(savePath.replace('%(ext)s', 'mp3'), finalSavePath);
+
       console.log('Audio saved as mp3');
 
       // Handle iTunes saving
@@ -198,6 +199,18 @@ async function download(url, title, downloadAsAudio, youtubeUrl, saveAsTitleValu
           '-metadata', `artist=${artistValue}`,
           iTunesPath
         ]);
+        
+        // use if you only need one copy of the file
+        // ffmpeg_name.on('close', (code) => {
+        //   console.log(`ffmpeg exited with code ${code}`);
+
+        //   try {
+        //     fs.unlinkSync(finalSavePath);
+        //     console.log('File deleted:', finalSavePath);
+        //   } catch (err) {
+        //     console.error('Failed to delete file:', err.message);
+        //   }
+        // });
       }
     } else {
       const finalSavePath = `${dir}/${title}.mp4`;
