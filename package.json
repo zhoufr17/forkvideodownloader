@@ -5,6 +5,7 @@
   "main": "main.js",
   "dependencies": {
     "@ffmpeg-installer/ffmpeg": "^1.0.19",
+    "encoding": "^0.1.13",
     "ffmpeg": "0.0.4",
     "fs-extra": "^8.1.0",
     "yt-dlp-exec": "^1.0.2",
@@ -12,8 +13,8 @@
   },
   "devDependencies": {
     "electron": "^5.0.13",
-    "electron-packager": "^15.2.0",
-    "electron-builder": "^20.44.4"
+    "electron-builder": "^20.44.4",
+    "electron-packager": "^15.2.0"
   },
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
