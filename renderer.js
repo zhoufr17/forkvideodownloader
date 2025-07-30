@@ -201,16 +201,16 @@ async function download(url, title, downloadAsAudio, youtubeUrl, saveAsTitleValu
         ]);
         
         // use if you only need one copy of the file
-        // ffmpeg_name.on('close', (code) => {
-        //   console.log(`ffmpeg exited with code ${code}`);
+        ffmpeg_name.on('close', (code) => {
+          console.log(`ffmpeg exited with code ${code}`);
 
-        //   try {
-        //     fs.unlinkSync(finalSavePath);
-        //     console.log('File deleted:', finalSavePath);
-        //   } catch (err) {
-        //     console.error('Failed to delete file:', err.message);
-        //   }
-        // });
+          try {
+            fs.unlinkSync(finalSavePath);
+            console.log('File deleted:', finalSavePath);
+          } catch (err) {
+            console.error('Failed to delete file:', err.message);
+          }
+        });
       }
     } else {
       const finalSavePath = `${dir}/${title}.mp4`;
@@ -230,8 +230,6 @@ async function download(url, title, downloadAsAudio, youtubeUrl, saveAsTitleValu
     var artistSauce = document.getElementById('artist');
     artistSauce.value = '';
     console.log("artistValue value: " + artistValue);
-
-    console.log("flag 4")
 
     // Progress bar cleanup
     barDiv.style.display = "none";
