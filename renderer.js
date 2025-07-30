@@ -170,10 +170,10 @@ async function download(url, title, downloadAsAudio, youtubeUrl, saveAsTitleValu
     await ytdlp(url, options);
     console.log('Download completed!');
     
-    // percentage.innerText = 'Download completed';
+    percentage.innerText = 'Download completed';
 
     //original chinese version
-    percentage.innerText = 'Download Completed! (下载完成了！）';
+    // percentage.innerText = 'Download Completed! (下载完成了！）';
 
     // Audio: rename to mp3
     // Video: rename to mp4
@@ -201,16 +201,16 @@ async function download(url, title, downloadAsAudio, youtubeUrl, saveAsTitleValu
         ]);
         
         // use if you only need one copy of the file
-        // ffmpeg_name.on('close', (code) => {
-        //   console.log(`ffmpeg exited with code ${code}`);
+        ffmpeg_name.on('close', (code) => {
+          console.log(`ffmpeg exited with code ${code}`);
 
-        //   try {
-        //     fs.unlinkSync(finalSavePath);
-        //     console.log('File deleted:', finalSavePath);
-        //   } catch (err) {
-        //     console.error('Failed to delete file:', err.message);
-        //   }
-        // });
+          try {
+            fs.unlinkSync(finalSavePath);
+            console.log('File deleted:', finalSavePath);
+          } catch (err) {
+            console.error('Failed to delete file:', err.message);
+          }
+        });
       }
     } else {
       const finalSavePath = `${dir}/${title}.mp4`;
@@ -237,29 +237,29 @@ async function download(url, title, downloadAsAudio, youtubeUrl, saveAsTitleValu
 
   } catch (error) {
     console.error('Download failed:', error);
-    // percentage.innerText = 'Error: Please double check video URL and try download again.';
+    percentage.innerText = 'Error: Please double check video URL and try download again.';
 
     //original chinese version
-    percentage.innerText = 'ERROR: 您打进的网址有问题! 请您把打进的网址重新看一遍. 谢谢！';
+    // percentage.innerText = 'ERROR: 您打进的网址有问题! 请您把打进的网址重新看一遍. 谢谢！';
 
-    // dialog.showMessageBox(remote.getCurrentWindow(), {
-    //   type: 'error',
-    //   buttons: ['Ok'],
-    //   defaultId: 2,
-    //   title: 'Download Error',
-    //   message: 'An error occurred while downloading. Please check the URL/title and try again.',
-    // });
-
-    //original chinese version
     dialog.showMessageBox(remote.getCurrentWindow(), {
       type: 'error',
       buttons: ['Ok'],
       defaultId: 2,
-      title: 'Error',
-      message: '您打进的网址有问题. 请您把打进的网址重新看一遍， 然后重新再下载。如国问题还没解决请您问周先生。谢谢！',
-      detail: '-周先生',
-      checkboxChecked: true,
-    })
+      title: 'Download Error',
+      message: 'An error occurred while downloading. Please check the URL/title and try again.',
+    });
+
+    //original chinese version
+    // dialog.showMessageBox(remote.getCurrentWindow(), {
+    //   type: 'error',
+    //   buttons: ['Ok'],
+    //   defaultId: 2,
+    //   title: 'Error',
+    //   message: '您打进的网址有问题. 请您把打进的网址重新看一遍， 然后重新再下载。如国问题还没解决请您问周先生。谢谢！',
+    //   detail: '-周先生',
+    //   checkboxChecked: true,
+    // })
 
     barDiv.style.display = "none";
   }
